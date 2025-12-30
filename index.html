@@ -6,57 +6,106 @@
 <title>Stream</title>
 
 <style>
-body{margin:0;background:#05060f;color:#e5e7eb;font-family:system-ui}
+:root{
+  --bg:#05060f;
+  --panel:#0b1020;
+  --accent:#3b82f6;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,Segoe UI,Inter,Arial;
+}
 .wrap{max-width:720px;margin:auto;padding:16px}
-.card{background:#0b1020;border-radius:14px;padding:14px}
+.card{
+  background:var(--panel);
+  border-radius:16px;
+  padding:16px;
+}
 .hidden{display:none}
-video{width:100%;border-radius:14px;background:#000;margin:12px 0}
-button{width:100%;padding:12px;border-radius:12px;border:none;background:#2563eb;color:#fff;font-weight:600}
+
+h1{font-size:20px;margin:0 0 10px}
+video{
+  width:100%;
+  background:#000;
+  border-radius:14px;
+  margin:12px 0;
+}
+
+.downloads a{
+  display:block;
+  text-decoration:none;
+  margin-top:8px;
+}
+.downloads button{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  background:#111827;
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+.error{
+  color:#ff6b6b;
+  text-align:center;
+}
 </style>
 </head>
 
 <body>
 <div class="wrap">
+
   <div id="app" class="card hidden">
-    <h2 id="title"></h2>
+    <h1 id="title"></h1>
     <video id="player" controls playsinline></video>
-    <div id="downloads"></div>
+    <div id="downloads" class="downloads"></div>
   </div>
-  <div id="error" class="card hidden"></div>
+
+  <div id="error" class="card hidden error"></div>
+
 </div>
 
 <script>
 const id = new URLSearchParams(location.search).get('id');
 const app = document.getElementById('app');
 const err = document.getElementById('error');
+const titleEl = document.getElementById('title');
+const player = document.getElementById('player');
+const downloads = document.getElementById('downloads');
 
 if(!id){
-  err.classList.remove('hidden');
   err.textContent = 'ID video tidak ditemukan';
+  err.classList.remove('hidden');
   throw '';
 }
 
-fetch('/videos?id=' + id)
+fetch('/videos?id=' + encodeURIComponent(id))
 .then(r => r.json())
 .then(v => {
   if(v.error) throw v.error;
 
-  app.classList.remove('hidden');
-  title.textContent = v.title || 'Untitled';
+  titleEl.textContent = v.title || 'Untitled';
   player.src = v.src;
+  app.classList.remove('hidden');
 
   downloads.innerHTML = '';
-  (v.downloads||[]).forEach(d=>{
-    const a=document.createElement('a');
-    a.href=d.url;
-    a.target='_blank';
-    a.innerHTML=`<button>${d.label||'Download'}</button>`;
+  (v.downloads || []).forEach(d=>{
+    const a = document.createElement('a');
+    a.href = d.url;
+    a.target = '_blank';
+    a.innerHTML = `<button>${d.label || 'Download'}</button>`;
     downloads.appendChild(a);
   });
 })
-.catch(e=>{
-  err.classList.remove('hidden');
+.catch(()=>{
   err.textContent = 'Video tidak ditemukan';
+  err.classList.remove('hidden');
 });
 </script>
 </body>
