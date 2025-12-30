@@ -17,15 +17,34 @@ body{
   margin:auto;
   padding:16px;
 }
-input,button{
+input,button,textarea{
   width:100%;
   padding:12px;
   margin-bottom:8px;
   border-radius:10px;
   border:none;
+  background:#161616;
+  color:#fff;
 }
-input{background:#161616;color:#fff}
-button{background:#3b82f6;color:#fff;font-weight:600}
+button{background:#3b82f6;color:#fff;font-weight:600;cursor:pointer}
+.download-row{
+  display:flex; gap:6px; margin-bottom:6px;
+}
+.download-row input{flex:1}
+.download-row button{width:42px;background:#ff0055}
+.downloads-container{margin-bottom:12px}
+textarea{resize:none}
+.preview-btn{
+  background:#2563eb;
+  padding:10px;
+  border-radius:10px;
+  margin-top:6px;
+  text-align:center;
+  font-weight:600;
+  cursor:pointer;
+}
+.row{display:flex;gap:6px;margin-top:4px;}
+.row button{flex:1}
 </style>
 </head>
 
@@ -37,37 +56,151 @@ button{background:#3b82f6;color:#fff;font-weight:600}
   <input id="title" placeholder="Judul video">
   <input id="src" placeholder="Link video (.mp4 / m3u8)">
 
+  <div class="small">Tombol Download</div>
+  <div class="downloads-container" id="downloads"></div>
+  <button onclick="addDownload()">➕ Tambah tombol download</button>
+
   <button onclick="save()">SIMPAN</button>
 
   <p>Link hasil:</p>
-  <input id="link" readonly>
+  <div style="display:flex;gap:6px;">
+    <textarea id="link" readonly style="flex:1"></textarea>
+    <button onclick="copyLink()">📋</button>
+  </div>
+
+  <div class="small">Preview</div>
+  <div id="preview" class="preview-btn">Player muncul di sini</div>
+
+  <h3>History</h3>
+  <div id="history"></div>
 </div>
 
 <script>
+const $ = id => document.getElementById(id);
+
+// ===== DOWNLOAD FIELD =====
+function addDownload(label='', url=''){
+  const d = document.createElement('div');
+  d.className = 'download-row';
+  d.draggable = true;
+  d.innerHTML = `
+    <input placeholder="Judul" value="${label}">
+    <input placeholder="Link" value="${url}">
+    <button onclick="this.parentNode.remove()">❌</button>`;
+  
+  // Drag & drop
+  d.addEventListener('dragstart', e=>{ e.dataTransfer.setData('text/plain', null); d.classList.add('dragging'); });
+  d.addEventListener('dragend', e=>{ d.classList.remove('dragging'); });
+  d.addEventListener('dragover', e=>{
+    e.preventDefault();
+    const container = $('downloads');
+    const dragging = container.querySelector('.dragging');
+    const afterElement = getDragAfterElement(container, e.clientY);
+    if(afterElement==null) container.appendChild(dragging);
+    else container.insertBefore(dragging, afterElement);
+  });
+
+  $('downloads').appendChild(d);
+}
+
+function getDragAfterElement(container, y){
+  const draggableElements = [...container.querySelectorAll('.download-row:not(.dragging)')];
+  return draggableElements.reduce((closest, child)=>{
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height/2;
+    if(offset<0 && offset>closest.offset){ return {offset:offset, element:child}; }
+    return closest;
+  }, {offset:Number.NEGATIVE_INFINITY}).element;
+}
+
+// ===== SAVE / GENERATE =====
 function save(){
-  const id = document.getElementById('id').value.trim();
-  const title = document.getElementById('title').value.trim();
-  const src = document.getElementById('src').value.trim();
+  let id = $('id').value.trim();
+  const title = $('title').value.trim();
+  const src = $('src').value.trim();
+  if(!title||!src) return alert('Lengkapi semua field');
 
-  if(!id || !title || !src){
-    alert('Lengkapi semua');
-    return;
-  }
+  if(!id) id = 'vid_'+Date.now().toString(36);
 
-  const data = {
-    [id]: { title, src }
-  };
+  const downloads=[];
+  document.querySelectorAll('.download-row').forEach(r=>{
+    if(r.children[1].value) downloads.push({label:r.children[0].value||'Download', url:r.children[1].value});
+  });
+  if(!downloads.length) downloads.push({label:'Download', url:src});
 
-  fetch('/videos',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(data)
-  }).then(()=>{
-    const link = location.origin + '/?v=' + id;
-    document.getElementById('link').value = link;
-    alert('Tersimpan');
+  const data = {[id]:{title, src, downloads}};
+  
+  fetch('/videos',{method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)})
+    .then(()=>{
+      const link = location.origin + '/?v=' + id;
+      $('link').value = link;
+      alert('Tersimpan!');
+      renderPreview(data[id]);
+      saveHistory(data, id);
+    });
+}
+
+// ===== COPY LINK =====
+function copyLink(){
+  $('link').select();
+  navigator.clipboard.writeText($('link').value);
+  alert('Link disalin');
+}
+
+// ===== PREVIEW =====
+function renderPreview(v){
+  $('preview').textContent = `Judul: ${v.title}\nLink player: ${v.src}\nDownload: ${v.downloads.map(d=>d.label).join(', ')}`;
+}
+
+// ===== HISTORY =====
+function saveHistory(data, id){
+  let h = JSON.parse(localStorage.getItem('history')||'[]');
+  h.unshift(data);
+  localStorage.setItem('history', JSON.stringify(h.slice(0,10)));
+  renderHistory();
+}
+
+function renderHistory(){
+  const h = JSON.parse(localStorage.getItem('history')||'[]');
+  $('history').innerHTML='';
+  h.forEach((o,i)=>{
+    const k = Object.keys(o)[0], v=o[k];
+    const div = document.createElement('div');
+    div.className='card';
+    div.innerHTML = `<b>${k}</b> — ${v.title}
+      <div class="row">
+        <button onclick="previewHistory(${i})">Preview</button>
+        <button onclick="editHistory(${i})">Edit</button>
+        <button onclick="delHistory(${i})">Hapus</button>
+      </div>`;
+    $('history').appendChild(div);
   });
 }
+
+function previewHistory(i){
+  const h = JSON.parse(localStorage.getItem('history')||'[]');
+  const k = Object.keys(h[i])[0], v=h[i][k];
+  $('id').value = k;
+  $('title').value = v.title;
+  $('src').value = v.src;
+  $('downloads').innerHTML='';
+  v.downloads.forEach(d=>addDownload(d.label,d.url));
+  $('link').value = location.origin + '/?v=' + k;
+  renderPreview(v);
+}
+
+function editHistory(i){
+  previewHistory(i);
+}
+
+function delHistory(i){
+  let h = JSON.parse(localStorage.getItem('history')||'[]');
+  h.splice(i,1);
+  localStorage.setItem('history', JSON.stringify(h));
+  renderHistory();
+}
+
+renderHistory();
 </script>
 </body>
 </html>
