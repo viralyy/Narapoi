@@ -244,7 +244,7 @@ const popup = document.getElementById('popup');
 const popupBox = document.getElementById('popupBox');
 
 /* === LOGIC ASLI LU === */
-const id = new URLSearchParams(location.search).get('v');
+const id = new URLSearchParams(location.search).get('id');
 
 fetch('/videos')
 .then(r=>r.json())
