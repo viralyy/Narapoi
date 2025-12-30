@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Narapoi</title>
+
+<style>
+body{
+  margin:0;
+  background:#0b0b0b;
+  color:#fff;
+  font-family:system-ui;
+}
+.wrap{
+  max-width:480px;
+  margin:auto;
+  padding:16px;
+}
+input,button{
+  width:100%;
+  padding:12px;
+  margin-bottom:8px;
+  border-radius:10px;
+  border:none;
+}
+input{background:#161616;color:#fff}
+button{background:#3b82f6;color:#fff;font-weight:600}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <h2>Admin Narapoi</h2>
+
+  <input id="id" placeholder="ID video (contoh: ngik)">
+  <input id="title" placeholder="Judul video">
+  <input id="src" placeholder="Link video (.mp4 / m3u8)">
+
+  <button onclick="save()">SIMPAN</button>
+
+  <p>Link hasil:</p>
+  <input id="link" readonly>
+</div>
+
+<script>
+function save(){
+  const id = document.getElementById('id').value.trim();
+  const title = document.getElementById('title').value.trim();
+  const src = document.getElementById('src').value.trim();
+
+  if(!id || !title || !src){
+    alert('Lengkapi semua');
+    return;
+  }
+
+  const data = {
+    [id]: { title, src }
+  };
+
+  fetch('/videos',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(data)
+  }).then(()=>{
+    const link = location.origin + '/?v=' + id;
+    document.getElementById('link').value = link;
+    alert('Tersimpan');
+  });
+}
+</script>
+</body>
+</html>
