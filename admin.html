@@ -57,7 +57,7 @@ button{width:100%;padding:12px;background:linear-gradient(135deg,#ff0055,#ff3c7d
 <script>
 /* ================= CONFIG ================= */
 const API = '/videos';
-const PUBLIC_DOMAIN = 'https://narapoi.page.dev'; // 🔥 FIX DOMAIN FINAL
+const PUBLIC_DOMAIN = 'https://narapoi.pages.dev'; // ✅ FIX FINAL
 const $ = id => document.getElementById(id);
 let editIndex = null;
 
@@ -96,7 +96,7 @@ function generate(){
   const data = { [id]: { title, src, downloads } };
 
   $('json').value = JSON.stringify(data,null,2);
-  $('link').value = PUBLIC_DOMAIN + '/?v=' + id; // 🔥 FIXED
+  $('link').value = PUBLIC_DOMAIN + '/?id=' + id; // ✅ FIX PARAM
 
   renderPreview(data[id]);
 
