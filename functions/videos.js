@@ -1,45 +1,30 @@
 export async function onRequest({ request, env }) {
-  const url = new URL(request.url);
+  const KEY = "videos";
+  let data = {};
 
-  /* ===== GET ===== */
-  if (request.method === 'GET') {
-    const id = url.searchParams.get('id');
-    if (!id) {
-      return Response.json({ error: 'Missing id' }, { status: 400 });
-    }
+  const raw = await env.VIDEOS.get(KEY);
+  if (raw) data = JSON.parse(raw);
 
-    const data = await env.VIDEOS.get(id, { type: 'json' });
-    if (!data) {
-      return Response.json({ error: 'Not found' }, { status: 404 });
-    }
-
-    return Response.json(data);
-  }
-
-  /* ===== POST ===== */
-  if (request.method === 'POST') {
+  // ===== TAMBAH / UPDATE =====
+  if (request.method === "POST") {
     const body = await request.json();
-    const id = Object.keys(body)[0];
-    const data = body[id];
+    data = { ...data, ...body };
 
-    if (!id || !data) {
-      return Response.json({ error: 'Invalid body' }, { status: 400 });
-    }
-
-    await env.VIDEOS.put(id, JSON.stringify(data));
+    await env.VIDEOS.put(KEY, JSON.stringify(data, null, 2));
     return Response.json({ success: true });
   }
 
-  /* ===== DELETE ===== */
-  if (request.method === 'DELETE') {
+  // ===== HAPUS =====
+  if (request.method === "DELETE") {
     const { id } = await request.json();
-    if (!id) {
-      return Response.json({ error: 'Missing id' }, { status: 400 });
-    }
+    delete data[id];
 
-    await env.VIDEOS.delete(id);
+    await env.VIDEOS.put(KEY, JSON.stringify(data, null, 2));
     return Response.json({ success: true });
   }
 
-  return new Response('Method Not Allowed', { status: 405 });
+  // ===== GET (seperti videos.json) =====
+  return new Response(JSON.stringify(data, null, 2), {
+    headers: { "Content-Type": "application/json" }
+  });
 }
