@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stream</title>
+
+<style>
+:root{
+  --bg:#05060f;
+  --panel:#0b1020;
+  --accent:#3b82f6;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,Segoe UI,Inter,Arial;
+}
+.wrap{max-width:720px;margin:auto;padding:14px}
+.card{
+  background:linear-gradient(180deg,#0b1020,#060814);
+  border-radius:14px;
+  padding:14px;
+}
+.hidden{display:none}
+
+h1{font-size:18px;margin:6px 0}
+.stats{
+  display:flex;
+  gap:16px;
+  font-size:12px;
+  color:var(--muted);
+}
+.online{display:flex;align-items:center;gap:6px}
+.dot{
+  width:8px;height:8px;border-radius:50%;
+  background:#22ff00;
+  opacity:.2;
+}
+.dot.on{animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:1}}
+
+video{
+  width:100%;
+  border-radius:14px;
+  background:#000;
+  margin:12px 0;
+}
+
+/* PROGRESS BAR */
+.progress-container{
+  width:100%;
+  height:6px;
+  background:#111827;
+  border-radius:3px;
+  margin-bottom:12px;
+  overflow:hidden;
+  cursor:pointer;
+  position:relative;
+}
+.progress-bar{
+  width:0%;
+  height:100%;
+  background:var(--accent);
+}
+.progress-handle{
+  width:12px;
+  height:12px;
+  background:#fff;
+  border-radius:50%;
+  position:absolute;
+  top:50%;
+  transform:translate(-50%,-50%);
+}
+.progress-tooltip{
+  position:absolute;
+  padding:2px 6px;
+  background:#111827;
+  color:#fff;
+  font-size:12px;
+  border-radius:4px;
+  transform:translate(-50%,-150%);
+  display:none;
+}
+
+/* CONTROLS */
+.controls{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:14px;
+  flex-wrap:wrap;
+}
+.ctrl{
+  width:40px;height:40px;
+  border-radius:10px;
+  background:#111827;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.ctrl svg{width:22px;height:22px;fill:#fff}
+
+.play-btn{
+  width:72px;height:72px;
+  border-radius:50%;
+  border:none;
+  background:linear-gradient(135deg,var(--accent),#2563eb);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.play-btn svg{width:34px;height:34px;fill:#fff}
+
+select{
+  width:40px;height:40px;
+  background:#111827;
+  border:1px solid #1f2937;
+  color:#fff;
+  border-radius:10px;
+}
+
+.full-btn{
+  width:100%;
+  margin-top:14px;
+  padding:14px;
+  border-radius:12px;
+  background:#111827;
+  border:1px solid #1f2937;
+  color:#fff;
+  font-weight:600;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+  <div id="app" class="card hidden">
+    <h1 id="title"></h1>
+
+    <div class="stats">
+      <div id="views">0 views</div>
+      <div class="online">
+        <div id="dot" class="dot"></div>
+        <span id="onlineText">0 online</span>
+      </div>
+    </div>
+
+    <video id="player" playsinline controls></video>
+
+    <div class="progress-container" id="progressContainer">
+      <div id="progress" class="progress-bar"></div>
+      <div id="handle" class="progress-handle"></div>
+      <div id="tooltip" class="progress-tooltip">0:00</div>
+    </div>
+
+    <div class="controls">
+      <div id="rewind" class="ctrl">
+        <svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12z"/></svg>
+      </div>
+
+      <button id="playBtn" class="play-btn">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+
+      <div id="forward" class="ctrl">
+        <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6z"/></svg>
+      </div>
+
+      <select id="speed">
+        <option value="1">1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+      </select>
+    </div>
+
+    <button id="openFull" class="full-btn">FULL KONTEN</button>
+  </div>
+</div>
+
+<script>
+const FIREBASE='https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app';
+const id = new URLSearchParams(location.search).get('v'); // FIX FINAL
+let allowPlay=false;
+
+const app = document.getElementById('app');
+const player = document.getElementById('player');
+const title = document.getElementById('title');
+const views = document.getElementById('views');
+const onlineText = document.getElementById('onlineText');
+const dot = document.getElementById('dot');
+const playBtn = document.getElementById('playBtn');
+const rewind = document.getElementById('rewind');
+const forward = document.getElementById('forward');
+const speed = document.getElementById('speed');
+
+fetch('/videos')
+.then(r=>{
+  if(!r.ok) throw new Error('Gagal fetch /videos');
+  return r.json();
+})
+.then(videos=>{
+  if(!id){
+    document.body.innerHTML='<h2 style="color:white;text-align:center">ID video tidak ada</h2>';
+    return;
+  }
+  if(!videos[id]){
+    document.body.innerHTML='<h2 style="color:white;text-align:center">Video tidak ditemukan</h2>';
+    return;
+  }
+
+  const v = videos[id];
+  app.classList.remove('hidden');
+  title.textContent = v.title;
+  player.src = v.src;
+
+  playBtn.onclick=()=>player.paused?player.play():player.pause();
+  rewind.onclick=()=>player.currentTime=Math.max(0,player.currentTime-5);
+  forward.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTime+5);
+  speed.onchange=e=>player.playbackRate=parseFloat(e.target.value);
+
+  fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
+    const val = typeof d==='number'?d+1:1;
+    fetch(`${FIREBASE}/views/${id}.json`,{method:'PUT',body:JSON.stringify(val)});
+  });
+
+  setInterval(()=>{
+    fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
+      views.textContent=(typeof d==='number'?d:0)+' views';
+    });
+  },3000);
+
+})
+.catch(err=>{
+  document.body.innerHTML =
+    '<h2 style="color:white;text-align:center">ERROR LOAD</h2><pre style="color:red">'+err+'</pre>';
+});
+</script>
+
+</body>
+</html>
