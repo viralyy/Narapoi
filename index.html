@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Narapoi Stream</title>
+
+<style>
+body{
+  margin:0;
+  background:#05060f;
+  color:#fff;
+  font-family:system-ui;
+}
+.wrap{
+  max-width:720px;
+  margin:auto;
+  padding:16px;
+}
+video{
+  width:100%;
+  background:#000;
+  border-radius:12px;
+  margin-top:12px;
+}
+.hidden{display:none}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+  <h2 id="title"></h2>
+  <video id="player" controls playsinline></video>
+</div>
+
+<script>
+const id = new URLSearchParams(location.search).get('v');
+
+console.log('ID:', id);
+
+fetch('/videos')
+  .then(r => {
+    console.log('STATUS:', r.status);
+    return r.json();
+  })
+  .then(videos => {
+    console.log('VIDEOS:', videos);
+
+    if (!id || !videos[id]) {
+      alert('Video tidak ditemukan');
+      return;
+    }
+
+    const v = videos[id];
+    document.getElementById('title').textContent = v.title;
+    document.getElementById('player').src = v.src;
+  })
+  .catch(err => {
+    console.error('FETCH ERROR:', err);
+    alert('Gagal load /videos');
+  });
+</script>
+</body>
+</html>
