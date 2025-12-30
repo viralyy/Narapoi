@@ -1,30 +1,68 @@
-export async function onRequest({ request, env }) {
-  const KEY = "videos";
-  let data = {};
+export async function onRequest(context) {
+  const { request, env } = context;
+  const url = new URL(request.url);
 
-  const raw = await env.VIDEOS.get(KEY);
-  if (raw) data = JSON.parse(raw);
+  /* ===== GET VIDEO ===== */
+  if (request.method === 'GET') {
+    const id = url.searchParams.get('id');
+    if (!id) {
+      return new Response(
+        JSON.stringify({ error: 'Missing id' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
-  // ===== TAMBAH / UPDATE =====
-  if (request.method === "POST") {
+    const data = await env.VIDEOS.get(id, { type: 'json' });
+    if (!data) {
+      return new Response(
+        JSON.stringify({ error: 'Not found' }),
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    return new Response(JSON.stringify(data), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  /* ===== SAVE VIDEO ===== */
+  if (request.method === 'POST') {
     const body = await request.json();
-    data = { ...data, ...body };
+    const id = Object.keys(body)[0];
+    const data = body[id];
 
-    await env.VIDEOS.put(KEY, JSON.stringify(data, null, 2));
-    return Response.json({ success: true });
+    if (!id || !data) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid body' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    await env.VIDEOS.put(id, JSON.stringify(data));
+
+    return new Response(
+      JSON.stringify({ success: true }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
-  // ===== HAPUS =====
-  if (request.method === "DELETE") {
+  /* ===== DELETE VIDEO ===== */
+  if (request.method === 'DELETE') {
     const { id } = await request.json();
-    delete data[id];
+    if (!id) {
+      return new Response(
+        JSON.stringify({ error: 'Missing id' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
-    await env.VIDEOS.put(KEY, JSON.stringify(data, null, 2));
-    return Response.json({ success: true });
+    await env.VIDEOS.delete(id);
+
+    return new Response(
+      JSON.stringify({ success: true }),
+      { headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
-  // ===== GET (seperti videos.json) =====
-  return new Response(JSON.stringify(data, null, 2), {
-    headers: { "Content-Type": "application/json" }
-  });
+  return new Response('Method Not Allowed', { status: 405 });
 }
