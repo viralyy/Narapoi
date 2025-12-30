@@ -1,8 +1,8 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin Narapoi</title>
 <style>
 body{
@@ -16,7 +16,7 @@ body{
   margin:auto;
   padding:16px;
 }
-input,button,textarea{
+input,textarea,button{
   width:100%;
   padding:12px;
   margin-bottom:8px;
@@ -25,7 +25,11 @@ input,button,textarea{
   background:#161616;
   color:#fff;
 }
-button{background:#3b82f6;color:#fff;font-weight:600;cursor:pointer}
+button{
+  background:#3b82f6;
+  font-weight:600;
+  cursor:pointer;
+}
 .downloads-container{
   display:flex;
   flex-direction:column;
@@ -35,21 +39,32 @@ button{background:#3b82f6;color:#fff;font-weight:600;cursor:pointer}
 .download-row{
   display:flex;
   gap:6px;
+  background:#222;
+  border-radius:8px;
+  padding:6px;
+  align-items:center;
 }
 .download-row input{flex:1}
-.download-row button{width:42px;background:#ff0055}
+.download-row button{
+  width:40px;
+  background:#ff3b3b;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:6px;
+  border-radius:6px;
+}
 .preview-btn{
   background:#2563eb;
-  padding:10px;
+  padding:12px;
   border-radius:10px;
   margin-top:6px;
-  text-align:center;
   font-weight:600;
+  text-align:center;
   cursor:pointer;
-  white-space:pre-wrap;
 }
 .row{display:flex;gap:6px;margin-top:4px;}
-.row button{flex:1}
+.row button{flex:1;display:flex;align-items:center;justify-content:center;gap:4px}
 .dragging{opacity:.5}
 </style>
 </head>
@@ -63,14 +78,18 @@ button{background:#3b82f6;color:#fff;font-weight:600;cursor:pointer}
 
   <div>Tombol Download</div>
   <div class="downloads-container" id="downloads"></div>
-  <button onclick="addDownload()">➕ Tambah tombol download</button>
+  <button onclick="addDownload()">Tambah tombol download</button>
 
-  <button onclick="save()">SIMPAN</button>
+  <button onclick="save()">Simpan</button>
 
   <p>Link hasil:</p>
   <div style="display:flex;gap:6px;">
     <textarea id="link" readonly style="flex:1"></textarea>
-    <button onclick="copyLink()">📋</button>
+    <button onclick="copyLink()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="#fff">
+        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+      </svg>
+    </button>
   </div>
 
   <div>Preview</div>
@@ -81,60 +100,61 @@ button{background:#3b82f6;color:#fff;font-weight:600;cursor:pointer}
 </div>
 
 <script>
-const $ = id => document.getElementById(id);
+const $ = id=>document.getElementById(id);
 let dragged=null;
 
 // ===== DOWNLOAD FIELD =====
 function addDownload(label='', url=''){
   const d = document.createElement('div');
-  d.className = 'download-row';
-  d.draggable = true;
-  d.innerHTML = `
+  d.className='download-row';
+  d.draggable=true;
+  d.innerHTML=`
     <input placeholder="Judul" value="${label}">
     <input placeholder="Link" value="${url}">
-    <button onclick="this.parentNode.remove()">❌</button>`;
-  
-  // Drag events
-  d.addEventListener('dragstart', ()=>dragged=d);
+    <button onclick="this.parentNode.remove()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#fff">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+      </svg>
+    </button>`;
+
+  // Drag events (mouse)
+  d.addEventListener('dragstart',()=>{dragged=d;d.classList.add('dragging')});
+  d.addEventListener('dragend',()=>d.classList.remove('dragging'));
   d.addEventListener('dragover', e=>{
     e.preventDefault();
-    const container = $('downloads');
-    const after = getDragAfterElement(container, e.clientY);
-    if(after==null) container.appendChild(dragged);
-    else container.insertBefore(dragged, after);
+    const after=getDragAfterElement($('downloads'), e.clientY);
+    if(after==null) $('downloads').appendChild(dragged);
+    else $('downloads').insertBefore(dragged,after);
   });
 
   // Touch support
-  let touchStartY=0;
-  d.addEventListener('touchstart', e=>{ touchStartY=e.touches[0].clientY; dragged=d; });
+  d.addEventListener('touchstart', e=>{dragged=d;});
   d.addEventListener('touchmove', e=>{
-    e.preventDefault();
-    const y=e.touches[0].clientY;
-    const container=$('downloads');
-    const after=getDragAfterElement(container,y);
-    if(after==null) container.appendChild(dragged);
-    else container.insertBefore(dragged,after);
+    const touch=e.touches[0];
+    const after=getDragAfterElement($('downloads'), touch.clientY);
+    if(after==null) $('downloads').appendChild(dragged);
+    else $('downloads').insertBefore(dragged,after);
   });
 
   $('downloads').appendChild(d);
 }
-function getDragAfterElement(container, y){
+function getDragAfterElement(container,y){
   const els=[...container.querySelectorAll('.download-row:not(.dragging)')];
-  return els.reduce((closest, child)=>{
+  return els.reduce((closest,child)=>{
     const box=child.getBoundingClientRect();
     const offset=y-(box.top+box.height/2);
     if(offset<0 && offset>closest.offset) return {offset:offset,element:child};
     return closest;
   },{offset:Number.NEGATIVE_INFINITY}).element;
 }
+addDownload();
 
 // ===== SAVE / GENERATE =====
 function save(){
-  let id = $('id').value.trim();
-  const title = $('title').value.trim();
-  const src = $('src').value.trim();
+  let id=$('id').value.trim();
+  const title=$('title').value.trim();
+  const src=$('src').value.trim();
   if(!title||!src) return alert('Lengkapi semua field');
-
   if(!id) id='vid_'+Date.now().toString(36);
 
   const downloads=[];
@@ -144,14 +164,12 @@ function save(){
   if(!downloads.length) downloads.push({label:'Download',url:src});
 
   const data={[id]:{title,src,downloads}};
-  
   fetch('/videos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
   .then(()=>{
-    const link=location.origin+'/?v='+id;
-    $('link').value=link;
-    alert('Tersimpan!');
+    $('link').value=location.origin+'/?v='+id;
     renderPreview(data[id]);
     saveHistory(data,id);
+    alert('Tersimpan!');
   });
 }
 
@@ -179,9 +197,15 @@ function renderHistory(){
     div.className='card';
     div.innerHTML=`<b>${k}</b> — ${v.title}
       <div class="row">
-        <button onclick="previewHistory(${i})">Preview</button>
-        <button onclick="editHistory(${i})">Edit</button>
-        <button onclick="delHistory(${i})">Hapus</button>
+        <button onclick="previewHistory(${i})">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M8 5v14l11-7z"/></svg> Preview
+        </button>
+        <button onclick="editHistory(${i})">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg> Edit
+        </button>
+        <button onclick="delHistory(${i})">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M16 9v10H8V9h8m-1.5-6H9.5l-1 1H5v2h14V4h-3.5l-1-1z"/></svg> Hapus
+        </button>
       </div>`;
     $('history').appendChild(div);
   });
