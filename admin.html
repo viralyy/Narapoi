@@ -1,183 +1,73 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<title>Admin Panel Narapoi</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Narapoi</title>
+
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#0b0b0b;color:#f1f1f1;font-family:system-ui}
-.page{max-width:480px;margin:auto;padding:16px}
-input,textarea{width:100%;padding:12px;background:#161616;border:1px solid #222;color:#fff;border-radius:12px;margin-bottom:8px}
-textarea{resize:none}
-button{width:100%;padding:12px;background:linear-gradient(135deg,#ff0055,#ff3c7d);color:#fff;border:none;border-radius:14px;font-weight:600}
-.small-btn{padding:8px;font-size:13px}
-.btn-gray{background:#333}
-.small{font-size:12px;color:#aaa;margin-bottom:6px}
-.card{background:#111;padding:12px;border-radius:14px;margin-bottom:10px}
-.row{display:flex;gap:6px}
-.row button{flex:1}
-.download-row{display:flex;gap:6px;margin-bottom:6px}
-.download-row input{flex:1}
-.download-row button{width:42px}
-.preview-btn{background:#ff0055;padding:10px;border-radius:10px;margin-top:6px;text-align:center;font-weight:600;cursor:pointer}
+body{
+  margin:0;
+  background:#0b0b0b;
+  color:#fff;
+  font-family:system-ui;
+}
+.wrap{
+  max-width:480px;
+  margin:auto;
+  padding:16px;
+}
+input,button{
+  width:100%;
+  padding:12px;
+  margin-bottom:8px;
+  border-radius:10px;
+  border:none;
+}
+input{background:#161616;color:#fff}
+button{background:#3b82f6;color:#fff;font-weight:600}
 </style>
 </head>
+
 <body>
-<div class="page">
+<div class="wrap">
+  <h2>Admin Narapoi</h2>
 
-<h2>Admin Panel Narapoi</h2>
+  <input id="id" placeholder="ID video (contoh: ngik)">
+  <input id="title" placeholder="Judul video">
+  <input id="src" placeholder="Link video (.mp4 / m3u8)">
 
-<input id="titleInput" placeholder="Judul video">
-<input id="stream" placeholder="Link stream video">
+  <button onclick="save()">SIMPAN</button>
 
-<!-- TAMBAHAN: Input ID Manual -->
-<input id="manualID" placeholder="Masukkan ID (boleh teks/angka)">
-
-<div class="small">Tombol Download</div>
-<div id="downloads"></div>
-<button class="small-btn btn-gray" onclick="addDownload()">➕ Tambah tombol</button>
-
-<br><br>
-<button onclick="generate()">Generate</button>
-
-<div class="small">Preview</div>
-<div id="preview" class="card"></div>
-
-<div class="small">JSON Output</div>
-<textarea id="json" rows="8" readonly></textarea>
-
-<div class="small">Link Stream (per video)</div>
-<textarea id="link" rows="2" readonly></textarea>
-<button class="small-btn btn-gray" onclick="copyText('link')">📋 Salin Link</button>
-
-<h3>History</h3>
-<div id="history"></div>
-
+  <p>Link hasil:</p>
+  <input id="link" readonly>
 </div>
 
 <script>
-const API = '/videos';
-const $ = id => document.getElementById(id);
-let editIndex = null;
+function save(){
+  const id = document.getElementById('id').value.trim();
+  const title = document.getElementById('title').value.trim();
+  const src = document.getElementById('src').value.trim();
 
-// ===== DOWNLOAD FIELD =====
-function addDownload(label='', url=''){
-  const d = document.createElement('div');
-  d.className = 'download-row';
-  d.innerHTML = `
-    <input placeholder="Judul" value="${label}">
-    <input placeholder="Link" value="${url}">
-    <button class="btn-gray" onclick="this.parentNode.remove()">❌</button>`;
-  $('downloads').appendChild(d);
-}
-addDownload();
+  if(!id || !title || !src){
+    alert('Lengkapi semua');
+    return;
+  }
 
-// ===== GENERATE =====
-function generate(){
-  const title = $('titleInput').value.trim();
-  const src = $('stream').value.trim();
-  if(!title || !src) return alert('Lengkapi data');
+  const data = {
+    [id]: { title, src }
+  };
 
-  const downloads=[];
-  document.querySelectorAll('.download-row').forEach(r=>{
-    if(r.children[1].value)
-      downloads.push({label:r.children[0].value||'Download', url:r.children[1].value});
-  });
-
-  if(!downloads.length) downloads.push({label:'Download', url:src});
-
-  // ===== MANUAL ID =====
-  let id = $('manualID').value.trim();
-  if(!id) id = 'vid_' + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
-
-  // ===== VALIDASI ID UNIK =====
-  const h = JSON.parse(localStorage.getItem('history')||'[]');
-  const idExists = h.some(o => Object.keys(o)[0] === id);
-  if(idExists && editIndex === null) return alert('ID sudah digunakan, gunakan ID lain!');
-
-  const data = { [id]: { title, src, downloads } };
-
-  $('json').value = JSON.stringify(data,null,2);
-  $('link').value = location.origin + '/?v=' + id;
-
-  renderPreview(data[id]);
-
-  // === SAVE TO KV ===
-  fetch(API, {
+  fetch('/videos',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify(data)
-  });
-
-  // ===== HISTORY =====
-  editIndex !== null ? (h[editIndex] = data) : (h.unshift(data));
-  editIndex = null;
-  localStorage.setItem('history', JSON.stringify(h.slice(0,10)));
-  renderHistory();
-}
-
-// ===== PREVIEW =====
-function renderPreview(v){
-  $('preview').innerHTML = `<b>${v.title}</b>` +
-    v.downloads.map(d=>`<div class="preview-btn">${d.label}</div>`).join('');
-}
-
-// ===== COPY =====
-function copyText(id){
-  const el = $(id);
-  if(!el.value) return alert('Kosong');
-  el.select();
-  navigator.clipboard.writeText(el.value);
-  alert('Disalin');
-}
-
-// ===== HISTORY =====
-function renderHistory(){
-  const h = JSON.parse(localStorage.getItem('history')||'[]');
-  $('history').innerHTML = '';
-  h.forEach((o,i)=>{
-    const k = Object.keys(o)[0], v=o[k];
-    $('history').innerHTML += `
-      <div class="card">
-        <b>${k}</b> — ${v.title}
-        <div class="row">
-          <button class="small-btn" onclick="editHistory(${i})">Edit</button>
-          <button class="small-btn btn-gray" onclick="del(${i})">Hapus</button>
-        </div>
-      </div>`;
+  }).then(()=>{
+    const link = location.origin + '/?v=' + id;
+    document.getElementById('link').value = link;
+    alert('Tersimpan');
   });
 }
-
-function editHistory(i){
-  const o = JSON.parse(localStorage.getItem('history'))[i];
-  const k = Object.keys(o)[0], v=o[k];
-  $('titleInput').value = v.title;
-  $('stream').value = v.src;
-  $('manualID').value = k; // restore ID saat edit
-  $('downloads').innerHTML = '';
-  v.downloads.forEach(d=>addDownload(d.label,d.url));
-  renderPreview(v);
-  editIndex = i;
-}
-
-// ===== DELETE (KV + LOCAL) =====
-function del(i){
-  const h = JSON.parse(localStorage.getItem('history'));
-  const id = Object.keys(h[i])[0];
-
-  fetch(API, {
-    method:'DELETE',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({id})
-  });
-
-  h.splice(i,1);
-  localStorage.setItem('history', JSON.stringify(h));
-  renderHistory();
-}
-
-renderHistory();
 </script>
 </body>
 </html>
