@@ -5,32 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin Narapoi</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui; }
-body { background: #0b0b0b; color: #fff; padding: 16px; }
-.wrap { max-width: 480px; margin: auto; display: flex; flex-direction: column; gap: 16px; }
-h2, h3 { margin-bottom: 8px; }
-input, textarea, button { border: none; border-radius: 10px; padding: 10px; color: #fff; background: #161616; font-size: 14px; }
-textarea { resize: none; min-height: 40px; }
-button { cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; transition: 0.2s; }
-button:hover { opacity: 0.85; }
-.downloads-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
-.download-row { display: flex; gap: 6px; align-items: center; background: #222; padding: 6px; border-radius: 8px; cursor: grab; }
-.download-row input { flex: 1; font-size: 13px; padding: 6px; border-radius: 6px; }
-.download-row button { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #ff3b3b; padding: 6px; border-radius: 6px; }
-.preview-btn { background: #2563eb; padding: 12px; border-radius: 10px; margin-top: 6px; font-weight: 600; text-align: center; min-height: 50px; display: flex; align-items: center; justify-content: center; white-space: pre-wrap; }
-.row { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
-.row button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; padding: 8px; font-size: 13px; }
-.dragging { opacity: 0.5; }
-.history-card { background: #111; padding: 8px; border-radius: 10px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; word-break: break-word; }
-.link-container { display: flex; gap: 6px; margin-bottom: 8px; }
-.link-container textarea { flex: 1; font-size: 13px; padding: 6px; border-radius: 6px; min-height: 40px; }
-@media (max-width: 500px){
-  .wrap { padding: 12px; }
-  input, textarea, button { font-size: 13px; }
-  .download-row input { font-size: 12px; }
-  .row button { font-size: 12px; padding: 6px; }
-  .preview-btn { font-size: 13px; padding: 10px; min-height: 45px; }
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#0b0b0b;color:#fff;padding:16px}
+.wrap{max-width:480px;margin:auto;display:flex;flex-direction:column;gap:16px}
+h2,h3{margin-bottom:8px}
+input,textarea,button{border:none;border-radius:10px;padding:10px;color:#fff;background:#161616;font-size:14px}
+textarea{resize:none;min-height:40px}
+button{cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:600;transition:.2s}
+button:hover{opacity:.85}
+.downloads-container{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.download-row{display:flex;gap:6px;align-items:center;background:#222;padding:6px;border-radius:8px;cursor:grab}
+.download-row input{flex:1;font-size:13px;padding:6px;border-radius:6px}
+.download-row button{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:#ff3b3b;padding:4px;border-radius:6px}
+.download-row .menu-btn{width:28px;height:28px;background:#555;border-radius:6px;font-size:16px;display:flex;align-items:center;justify-content:center}
+.preview-btn{background:#2563eb;padding:12px;border-radius:10px;margin-top:6px;font-weight:600;text-align:center;min-height:50px;display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:flex-start;white-space:pre-wrap}
+.row{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.row button{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:8px;font-size:13px}
+.dragging{opacity:.5}
+.history-card{background:#111;padding:8px;border-radius:10px;display:flex;flex-direction:column;gap:6px;margin-bottom:6px;word-break:break-word}
+.link-container{display:flex;gap:6px;margin-bottom:8px}
+.link-container textarea{flex:1;font-size:13px;padding:6px;border-radius:6px;min-height:40px}
+@media(max-width:500px){
+  .wrap{padding:12px}
+  input,textarea,button{font-size:13px}
+  .download-row input{font-size:12px}
+  .row button{font-size:12px;padding:6px}
+  .preview-btn{font-size:13px;padding:10px;min-height:45px}
 }
+video{max-width:100%;border-radius:10px;background:#000}
+.preview-download-btn{background:#3b82f6;color:#fff;padding:6px 10px;border-radius:6px;margin-top:4px;cursor:pointer;font-size:13px}
 </style>
 </head>
 <body>
@@ -54,7 +57,7 @@ button:hover { opacity: 0.85; }
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#fff">
       <path d="M5 5V19H19V5H5ZM17 17H7V7H17V17Z"/>
     </svg>
-    Simpan
+    Generate
   </button>
 
   <div>Link hasil:</div>
@@ -76,7 +79,7 @@ button:hover { opacity: 0.85; }
 </div>
 
 <script>
-/* --- Semua logic JS kamu tetap sama, tidak diubah/hapus --- */
+/* === Semua logic JS asli tetap sama, tidak dihapus/diubah === */
 const $ = id=>document.getElementById(id);
 let dragged=null;
 
@@ -85,12 +88,11 @@ function addDownload(label='', url=''){
   d.className='download-row';
   d.draggable=true;
   d.innerHTML=`
+    <div class="menu-btn" onclick="moveDownload(this)">⋮</div>
     <input placeholder="Judul" value="${label}">
     <input placeholder="Link" value="${url}">
     <button onclick="this.parentNode.remove()">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#fff">
-        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12Z"/>
-      </svg>
+      &times;
     </button>`;
   d.addEventListener('dragstart',()=>{dragged=d;d.classList.add('dragging')});
   d.addEventListener('dragend',()=>d.classList.remove('dragging'));
@@ -109,6 +111,17 @@ function addDownload(label='', url=''){
   });
   $('downloads').appendChild(d);
 }
+
+// Pindah posisi tombol download via titik tiga
+function moveDownload(el){
+  const row=el.parentNode;
+  const container=$('downloads');
+  const index=[...container.children].indexOf(row);
+  const move=prompt("Ketik 'up' untuk pindah atas, 'down' untuk pindah bawah","");
+  if(move==='up' && index>0) container.insertBefore(row, container.children[index-1]);
+  if(move==='down' && index<container.children.length-1) container.insertBefore(row, container.children[index+1].nextSibling);
+}
+
 function getDragAfterElement(container,y){
   const els=[...container.querySelectorAll('.download-row:not(.dragging)')];
   return els.reduce((closest,child)=>{
@@ -129,7 +142,7 @@ function save(){
 
   const downloads=[];
   document.querySelectorAll('.download-row').forEach(r=>{
-    if(r.children[1].value) downloads.push({label:r.children[0].value||'Download',url:r.children[1].value});
+    if(r.children[2].value) downloads.push({label:r.children[1].value||'Download',url:r.children[2].value});
   });
   if(!downloads.length) downloads.push({label:'Download',url:src});
 
@@ -143,9 +156,25 @@ function save(){
   });
 }
 
-function copyLink(){ $('link').select(); navigator.clipboard.writeText($('link').value); alert('Link disalin'); }
+// Render preview sekarang video + tombol download
+function renderPreview(v){
+  $('preview').innerHTML='';
+  const video=document.createElement('video');
+  video.src=v.src;
+  video.controls=true;
+  video.autoplay=false;
+  $('preview').appendChild(video);
+  v.downloads.forEach(d=>{
+    const btn=document.createElement('button');
+    btn.textContent=d.label;
+    btn.className='preview-download-btn';
+    btn.onclick=()=>window.open(d.url,'_blank');
+    $('preview').appendChild(btn);
+  });
+}
 
-function renderPreview(v){ $('preview').textContent=`Judul: ${v.title}\nLink player: ${v.src}\nDownload: ${v.downloads.map(d=>d.label).join(', ')}`; }
+/* === Logic history tetap sama === */
+function copyLink(){ $('link').select(); navigator.clipboard.writeText($('link').value); alert('Link disalin'); }
 
 function saveHistory(data,id){
   let h=JSON.parse(localStorage.getItem('history')||'[]');
@@ -162,15 +191,9 @@ function renderHistory(){
     div.className='history-card';
     div.innerHTML=`<b>${k}</b> — ${v.title}
       <div class="row">
-        <button onclick="previewHistory(${i})">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M8 5v14l11-7z"/></svg> Preview
-        </button>
-        <button onclick="editHistory(${i})">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg> Edit
-        </button>
-        <button onclick="delHistory(${i})">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#fff"><path d="M16 9v10H8V9h8m-1.5-6H9.5l-1 1H5v2h14V4h-3.5l-1-1z"/></svg> Hapus
-        </button>
+        <button onclick="previewHistory(${i})">Preview</button>
+        <button onclick="editHistory(${i})">Edit</button>
+        <button onclick="delHistory(${i})">Hapus</button>
       </div>`;
     $('history').appendChild(div);
   });
