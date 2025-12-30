@@ -4,25 +4,69 @@
 <meta charset="UTF-8">
 <title>Admin Panel Narapoi</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#0b0b0b;color:#f1f1f1;font-family:system-ui}
-.page{max-width:480px;margin:auto;padding:16px}
-input,textarea{width:100%;padding:12px;background:#161616;border:1px solid #222;color:#fff;border-radius:12px;margin-bottom:8px}
+body{
+  margin:0;
+  background:#0b0b0b;
+  color:#f1f1f1;
+  font-family:system-ui
+}
+.page{
+  max-width:480px;
+  margin:auto;
+  padding:16px
+}
+input,textarea{
+  width:100%;
+  padding:12px;
+  background:#161616;
+  border:1px solid #222;
+  color:#fff;
+  border-radius:12px;
+  margin-bottom:8px
+}
 textarea{resize:none}
-button{width:100%;padding:12px;background:linear-gradient(135deg,#ff0055,#ff3c7d);color:#fff;border:none;border-radius:14px;font-weight:600}
+button{
+  width:100%;
+  padding:12px;
+  background:linear-gradient(135deg,#ff0055,#ff3c7d);
+  color:#fff;
+  border:none;
+  border-radius:14px;
+  font-weight:600;
+  cursor:pointer
+}
 .small-btn{padding:8px;font-size:13px}
 .btn-gray{background:#333}
 .small{font-size:12px;color:#aaa;margin-bottom:6px}
-.card{background:#111;padding:12px;border-radius:14px;margin-bottom:10px}
+.card{
+  background:#111;
+  padding:12px;
+  border-radius:14px;
+  margin-bottom:10px
+}
 .row{display:flex;gap:6px}
 .row button{flex:1}
-.download-row{display:flex;gap:6px;margin-bottom:6px}
+.download-row{
+  display:flex;
+  gap:6px;
+  margin-bottom:6px
+}
 .download-row input{flex:1}
 .download-row button{width:42px}
-.preview-btn{background:#ff0055;padding:10px;border-radius:10px;margin-top:6px;text-align:center;font-weight:600;cursor:pointer}
+.preview-btn{
+  background:#ff0055;
+  padding:10px;
+  border-radius:10px;
+  margin-top:6px;
+  text-align:center;
+  font-weight:600
+}
 </style>
 </head>
+
 <body>
 <div class="page">
 
@@ -30,13 +74,11 @@ button{width:100%;padding:12px;background:linear-gradient(135deg,#ff0055,#ff3c7d
 
 <input id="titleInput" placeholder="Judul video">
 <input id="stream" placeholder="Link stream video">
-
-<!-- TAMBAHAN: Input ID Manual -->
-<input id="manualID" placeholder="Masukkan ID (boleh teks/angka)">
+<input id="manualID" placeholder="ID video (contoh: ngik)">
 
 <div class="small">Tombol Download</div>
 <div id="downloads"></div>
-<button class="small-btn btn-gray" onclick="addDownload()">➕ Tambah tombol</button>
+<button class="small-btn btn-gray" onclick="addDownload()">Tambah tombol</button>
 
 <br><br>
 <button onclick="generate()">Generate</button>
@@ -47,9 +89,9 @@ button{width:100%;padding:12px;background:linear-gradient(135deg,#ff0055,#ff3c7d
 <div class="small">JSON Output</div>
 <textarea id="json" rows="8" readonly></textarea>
 
-<div class="small">Link Stream (per video)</div>
+<div class="small">Link Stream</div>
 <textarea id="link" rows="2" readonly></textarea>
-<button class="small-btn btn-gray" onclick="copyText('link')">📋 Salin Link</button>
+<button class="small-btn btn-gray" onclick="copyText('link')">Salin Link</button>
 
 <h3>History</h3>
 <div id="history"></div>
@@ -57,123 +99,152 @@ button{width:100%;padding:12px;background:linear-gradient(135deg,#ff0055,#ff3c7d
 </div>
 
 <script>
+/* ================= CONFIG ================= */
 const API = '/videos';
+const PUBLIC_DOMAIN = 'https://narapoi.pages.dev';
 const $ = id => document.getElementById(id);
 let editIndex = null;
 
-// ===== DOWNLOAD FIELD =====
+/* ============== DOWNLOAD FIELD ============== */
 function addDownload(label='', url=''){
   const d = document.createElement('div');
   d.className = 'download-row';
   d.innerHTML = `
     <input placeholder="Judul" value="${label}">
     <input placeholder="Link" value="${url}">
-    <button class="btn-gray" onclick="this.parentNode.remove()">❌</button>`;
+    <button class="btn-gray" onclick="this.parentNode.remove()">✕</button>
+  `;
   $('downloads').appendChild(d);
 }
 addDownload();
 
-// ===== GENERATE =====
+/* ============== SANITIZE ID ============== */
+function cleanID(str){
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g,'-')
+    .replace(/[^a-z0-9-_]/g,'');
+}
+
+/* ================= GENERATE ================= */
 function generate(){
   const title = $('titleInput').value.trim();
-  const src = $('stream').value.trim();
-  if(!title || !src) return alert('Lengkapi data');
+  const src   = $('stream').value.trim();
 
+  if(!title || !src){
+    alert('Judul & link stream wajib diisi');
+    return;
+  }
+
+  /* DOWNLOADS */
   const downloads=[];
   document.querySelectorAll('.download-row').forEach(r=>{
-    if(r.children[1].value)
-      downloads.push({label:r.children[0].value||'Download', url:r.children[1].value});
+    if(r.children[1].value.trim()){
+      downloads.push({
+        label: r.children[0].value || 'Download',
+        url: r.children[1].value
+      });
+    }
   });
 
-  if(!downloads.length) downloads.push({label:'Download', url:src});
+  if(!downloads.length){
+    downloads.push({label:'Download', url:src});
+  }
 
-  // ===== MANUAL ID =====
-  let id = $('manualID').value.trim();
-  if(!id) id = 'vid_' + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+  /* ID */
+  let id = cleanID($('manualID').value);
+  if(!id){
+    id = 'vid-' + Date.now().toString(36);
+  }
 
-  // ===== VALIDASI ID UNIK =====
-  const h = JSON.parse(localStorage.getItem('history')||'[]');
-  const idExists = h.some(o => Object.keys(o)[0] === id);
-  if(idExists && editIndex === null) return alert('ID sudah digunakan, gunakan ID lain!');
+  /* CEK DUPLIKAT */
+  const history = JSON.parse(localStorage.getItem('history') || '[]');
+  const used = history.some((o,i)=>Object.keys(o)[0]===id && i!==editIndex);
+  if(used){
+    alert('ID sudah dipakai');
+    return;
+  }
 
   const data = { [id]: { title, src, downloads } };
 
   $('json').value = JSON.stringify(data,null,2);
-  $('link').value = location.origin + '/?v=' + id;
+  $('link').value = PUBLIC_DOMAIN + '/?v=' + id;
 
   renderPreview(data[id]);
 
-  // === SAVE TO KV ===
-  fetch(API, {
+  /* SAVE KE KV */
+  fetch(API,{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify(data)
   });
 
-  // ===== HISTORY =====
-  editIndex !== null ? (h[editIndex] = data) : (h.unshift(data));
-  editIndex = null;
-  localStorage.setItem('history', JSON.stringify(h.slice(0,10)));
+  editIndex!==null ? history[editIndex]=data : history.unshift(data);
+  editIndex=null;
+
+  localStorage.setItem('history', JSON.stringify(history.slice(0,10)));
   renderHistory();
 }
 
-// ===== PREVIEW =====
+/* ================= PREVIEW ================= */
 function renderPreview(v){
-  $('preview').innerHTML = `<b>${v.title}</b>` +
+  $('preview').innerHTML =
+    `<b>${v.title}</b>` +
     v.downloads.map(d=>`<div class="preview-btn">${d.label}</div>`).join('');
 }
 
-// ===== COPY =====
+/* ================= COPY ================= */
 function copyText(id){
-  const el = $(id);
-  if(!el.value) return alert('Kosong');
+  const el=$(id);
   el.select();
   navigator.clipboard.writeText(el.value);
-  alert('Disalin');
+  alert('Link disalin');
 }
 
-// ===== HISTORY =====
+/* ================= HISTORY ================= */
 function renderHistory(){
   const h = JSON.parse(localStorage.getItem('history')||'[]');
-  $('history').innerHTML = '';
+  $('history').innerHTML='';
   h.forEach((o,i)=>{
-    const k = Object.keys(o)[0], v=o[k];
-    $('history').innerHTML += `
+    const k=Object.keys(o)[0], v=o[k];
+    $('history').innerHTML+=`
       <div class="card">
         <b>${k}</b> — ${v.title}
         <div class="row">
           <button class="small-btn" onclick="editHistory(${i})">Edit</button>
           <button class="small-btn btn-gray" onclick="del(${i})">Hapus</button>
         </div>
-      </div>`;
+      </div>
+    `;
   });
 }
 
 function editHistory(i){
-  const o = JSON.parse(localStorage.getItem('history'))[i];
-  const k = Object.keys(o)[0], v=o[k];
-  $('titleInput').value = v.title;
-  $('stream').value = v.src;
-  $('manualID').value = k; // restore ID saat edit
-  $('downloads').innerHTML = '';
+  const o=JSON.parse(localStorage.getItem('history'))[i];
+  const k=Object.keys(o)[0], v=o[k];
+  $('titleInput').value=v.title;
+  $('stream').value=v.src;
+  $('manualID').value=k;
+  $('downloads').innerHTML='';
   v.downloads.forEach(d=>addDownload(d.label,d.url));
   renderPreview(v);
-  editIndex = i;
+  editIndex=i;
 }
 
-// ===== DELETE (KV + LOCAL) =====
+/* ================= DELETE ================= */
 function del(i){
-  const h = JSON.parse(localStorage.getItem('history'));
-  const id = Object.keys(h[i])[0];
+  const h=JSON.parse(localStorage.getItem('history'));
+  const id=Object.keys(h[i])[0];
 
-  fetch(API, {
+  fetch(API,{
     method:'DELETE',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({id})
   });
 
   h.splice(i,1);
-  localStorage.setItem('history', JSON.stringify(h));
+  localStorage.setItem('history',JSON.stringify(h));
   renderHistory();
 }
 
