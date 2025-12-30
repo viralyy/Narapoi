@@ -27,7 +27,6 @@ body{
   padding:14px;
 }
 .hidden{display:none}
-
 h1{font-size:18px;margin:6px 0}
 .stats{
   display:flex;
@@ -51,64 +50,50 @@ video{
   margin:12px 0;
 }
 
-/* PROGRESS BAR */
+/* PROGRESS */
 .progress-container{
   width:100%;
   height:6px;
   background:#111827;
   border-radius:3px;
   margin-bottom:12px;
-  overflow:hidden;
-  cursor:pointer;
   position:relative;
 }
 .progress-bar{
   width:0%;
   height:100%;
   background:var(--accent);
-  transition:width 0.1s linear;
-  position:relative;
 }
 .progress-handle{
-  width:12px;
-  height:12px;
-  background:#fff;
-  border-radius:50%;
-  position:absolute;
-  top:50%;
+  width:12px;height:12px;
+  background:#fff;border-radius:50%;
+  position:absolute;top:50%;
   transform:translate(-50%,-50%);
-  cursor:pointer;
 }
 .progress-tooltip{
   position:absolute;
   padding:2px 6px;
   background:#111827;
-  color:#fff;
   font-size:12px;
   border-radius:4px;
-  white-space:nowrap;
   transform:translate(-50%,-150%);
   display:none;
-  pointer-events:none;
 }
 
-/* === CONTROLS === */
 .controls{
   display:flex;
   justify-content:center;
   align-items:center;
   gap:14px;
   flex-wrap:wrap;
-  margin-top:0;
 }
 .ctrl{
-  width:40px;height:40px; 
+  width:40px;height:40px;
   border-radius:10px;
   background:#111827;
   display:flex;
   align-items:center;
   justify-content:center;
-  cursor:pointer;
 }
 .ctrl svg{width:22px;height:22px;fill:#fff}
 
@@ -120,42 +105,26 @@ video{
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow:0 12px 30px rgba(59,130,246,.45);
-  transition:.3s;
 }
-.play-btn.playing{transform:rotate(180deg)}
 .play-btn svg{width:34px;height:34px;fill:#fff}
 
 select{
-  width:40px;
-  height:40px;
+  width:40px;height:40px;
   background:#111827;
-  border:1px solid #1f2937;
   color:#fff;
   border-radius:10px;
-  padding:0;
-  text-align:center;
-  cursor:pointer;
-  -moz-appearance:none;
-  -webkit-appearance:none;
-  appearance:none;
 }
 
-/* FULL KONTEN BUTTON */
 .full-btn{
   width:100%;
   margin-top:14px;
   padding:14px;
   border-radius:12px;
   background:#111827;
-  border:1px solid #1f2937;
   color:#fff;
   font-weight:600;
-  cursor:pointer;
-  font-size:16px;
 }
 
-/* POPUP FIX CLICKABLE & MOBILE FRIENDLY */
 .popup{
   position:fixed;
   inset:0;
@@ -164,9 +133,7 @@ select{
   align-items:flex-end;
   z-index:999;
 }
-.popup.show{
-  display:flex;
-}
+.popup.show{display:flex}
 .popup-bg{
   position:absolute;
   inset:0;
@@ -176,53 +143,18 @@ select{
   position:relative;
   width:95%;
   max-width:500px;
-  max-height:70vh;
   background:#0b1020;
   border-radius:16px 16px 0 0;
   padding:16px;
-  transform:translateY(100%);
-  animation:slideUp .4s forwards;
-  z-index:1;
-  overflow-y:auto;
 }
-@keyframes slideUp{to{transform:translateY(0)}}
 .popup-box a{
   display:block;
   margin-top:10px;
   padding:12px;
   border-radius:10px;
   background:#111827;
-  border:1px solid #1f2937;
   color:#fff;
   text-decoration:none;
-  pointer-events:auto;
-  font-size:16px;
-}
-
-/* CIHUY */
-#cihuy{
-  position:fixed;
-  left:50%;
-  bottom:-50px;
-  transform:translateX(-50%);
-  font-size:22px;
-  font-weight:700;
-  animation:cihuy 2s ease forwards;
-}
-@keyframes cihuy{
-  0%{bottom:-50px;opacity:0}
-  30%{bottom:50%;opacity:1}
-  100%{bottom:120%;opacity:0}
-}
-
-/* RESPONSIVE ADJUSTMENTS */
-@media(max-width:480px){
-  .controls{
-    gap:10px;
-  }
-  .ctrl{width:36px;height:36px}
-  .play-btn{width:60px;height:60px}
-  select{width:36px;height:36px;font-size:14px}
 }
 </style>
 </head>
@@ -231,6 +163,7 @@ select{
 
 <div class="wrap">
 <div id="app" class="card hidden">
+
 <h1 id="title"></h1>
 
 <div class="stats">
@@ -242,6 +175,7 @@ select{
 </div>
 
 <video id="player" playsinline></video>
+
 <div class="progress-container" id="progressContainer">
   <div id="progress" class="progress-bar"></div>
   <div id="handle" class="progress-handle"></div>
@@ -249,21 +183,12 @@ select{
 </div>
 
 <div class="controls">
-  <div id="fs" class="ctrl">
-    <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm10 0h-2v3h-3v2h5v-5zM7 7h3V5H5v5h2V7zm12 3V5h-5v2h3v3h2z"/></svg>
-  </div>
+  <div id="fs" class="ctrl">⛶</div>
+  <div id="rewind" class="ctrl">⏪</div>
 
-  <div id="rewind" class="ctrl">
-    <svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12z"/></svg>
-  </div>
+  <button id="playBtn" class="play-btn">▶</button>
 
-  <button id="playBtn" class="play-btn">
-    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-  </button>
-
-  <div id="forward" class="ctrl">
-    <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6z"/></svg>
-  </div>
+  <div id="forward" class="ctrl">⏩</div>
 
   <select id="speed">
     <option value="1">1x</option>
@@ -274,6 +199,7 @@ select{
 </div>
 
 <button id="openFull" class="full-btn">FULL KONTEN</button>
+
 </div>
 </div>
 
@@ -283,145 +209,55 @@ select{
 </div>
 
 <script>
+/* ===== ELEMENT BINDING (FIX UTAMA) ===== */
+const app = document.getElementById('app');
+const title = document.getElementById('title');
+const player = document.getElementById('player');
+const playBtn = document.getElementById('playBtn');
+const rewind = document.getElementById('rewind');
+const forward = document.getElementById('forward');
+const fs = document.getElementById('fs');
+const speed = document.getElementById('speed');
+const openFull = document.getElementById('openFull');
+const popup = document.getElementById('popup');
+const popupBox = document.getElementById('popupBox');
+const views = document.getElementById('views');
+const onlineText = document.getElementById('onlineText');
+const dot = document.getElementById('dot');
+
 const FIREBASE='https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app';
 const id=new URLSearchParams(location.search).get('v');
-let allowPlay=false;
 
 fetch('/videos').then(r=>r.json()).then(videos=>{
-if(!id||!videos[id])return;
-const v=videos[id];
-app.classList.remove('hidden');
-title.textContent=v.title;
-player.src=v.src;
+  if(!id || !videos[id]) return;
 
-/* IKLAN KE-2 */
-player.addEventListener('play', e => {
-  if(!allowPlay){
-    allowPlay = true;
-    // showAd();
-  }
+  const v = videos[id];
+
+  app.classList.remove('hidden');
+  title.textContent = v.title;
+  player.src = v.src;
+  player.load(); // 🔥 FIX MOBILE
+
+  playBtn.onclick=()=>player.paused?player.play():player.pause();
+  rewind.onclick=()=>player.currentTime-=5;
+  forward.onclick=()=>player.currentTime+=5;
+  fs.onclick=()=>player.requestFullscreen();
+  speed.onchange=e=>player.playbackRate=e.target.value;
+
+  openFull.onclick=()=>{
+    popupBox.innerHTML='';
+    (v.downloads||[]).forEach(d=>{
+      const a=document.createElement('a');
+      a.href=d.url;
+      a.target='_blank';
+      a.textContent=d.label;
+      popupBox.appendChild(a);
+    });
+    popup.classList.add('show');
+  };
+
+  document.querySelector('.popup-bg').onclick=()=>popup.classList.remove('show');
 });
-
-/* PROGRESS BAR */
-const progressContainer = document.getElementById('progressContainer');
-const progressBar = document.getElementById('progress');
-const handle = document.getElementById('handle');
-const tooltip = document.getElementById('tooltip');
-
-const formatTime = s=>{
-  const m=Math.floor(s/60);
-  const sec=Math.floor(s%60);
-  return m+':'+(sec<10?'0':'')+sec;
-};
-
-function updateUI(){
-  const pct = (player.currentTime / player.duration) * 100 || 0;
-  progressBar.style.width = pct + '%';
-  handle.style.left = pct + '%';
-  tooltip.style.left = pct + '%';
-  tooltip.textContent = formatTime(player.currentTime);
-}
-
-player.addEventListener('timeupdate', updateUI);
-
-/* DRAG HANDLE */
-let isDragging=false;
-
-handle.addEventListener('mousedown', e=>{
-  isDragging=true;
-  e.preventDefault();
-});
-document.addEventListener('mousemove', e=>{
-  if(!isDragging) return;
-  const rect = progressContainer.getBoundingClientRect();
-  let pct = (e.clientX - rect.left)/rect.width;
-  pct = Math.max(0, Math.min(1, pct));
-  player.currentTime = pct * player.duration;
-  updateUI();
-});
-document.addEventListener('mouseup', e=>{ isDragging=false; });
-
-/* TOOLTIP HOVER */
-progressContainer.addEventListener('mousemove', e=>{
-  const rect = progressContainer.getBoundingClientRect();
-  let pct = (e.clientX - rect.left)/rect.width;
-  pct = Math.max(0, Math.min(1, pct));
-  tooltip.style.display='block';
-  tooltip.style.left = (pct*100)+'%';
-  tooltip.textContent = formatTime(pct*player.duration);
-});
-progressContainer.addEventListener('mouseleave', ()=>{
-  tooltip.style.display='none';
-});
-
-/* CONTROLS */
-playBtn.onclick=()=>{
-player.paused?player.play():player.pause();
-playBtn.classList.toggle('playing',!player.paused);
-};
-rewind.onclick=()=>player.currentTime=Math.max(0,player.currentTime-5);
-forward.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTime+5);
-fs.onclick=()=>!document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
-speed.onchange=e=>player.playbackRate=parseFloat(e.target.value);
-
-/* FULL + CIHUY */
-openFull.onclick=()=>{
-popupBox.innerHTML='';
-(v.downloads||[]).forEach(d=>{
-const a=document.createElement('a');
-a.href=d.url;a.target='_blank';a.textContent=d.label;
-popupBox.appendChild(a);
-});
-popup.classList.add('show');
-const n=document.createElement('div');
-n.id='cihuy';n.textContent='CIHUY🗿';
-document.body.appendChild(n);
-setTimeout(()=>n.remove(),2000);
-};
-
-// tutup popup hanya kalau klik background
-document.querySelector('.popup-bg').onclick = () => {
-  document.getElementById('popup').classList.remove('show');
-};
-
-/* VIEWS */
-fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(data=>{
-if(typeof data==='number'){
-fetch(`${FIREBASE}/views/${id}.json`,{method:'PUT',body:JSON.stringify(data+1)});
-}else{
-fetch(`${FIREBASE}/views/${id}/${Date.now()}.json`,{method:'PUT',body:1});
-}
-});
-setInterval(()=>{
-fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
-let total=typeof d==='number'?d:(d?Object.keys(d).length:0);
-views.textContent=total+' views';
-});
-},3000);
-
-/* ONLINE */
-const sid=Math.random().toString(36).slice(2);
-setInterval(()=>{
-fetch(`${FIREBASE}/online/${id}/${sid}.json`,{method:'PUT',body:Date.now()});
-fetch(`${FIREBASE}/online/${id}.json`).then(r=>r.json()).then(d=>{
-let c=0,now=Date.now();
-for(let k in d)if(now-d[k]<10000)c++;
-onlineText.textContent=c+' online';
-dot.classList.toggle('on',c>0);
-});
-},4000);
-});
-</script>
-
-<!-- HISTATS -->
-<iframe src="histats.html" style="display:none"></iframe>
-
-<!-- IKLAN KE-1 -->
-<script>
-(function(s){
-s.dataset.zone='10109877';
-s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement,document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
 </script>
 
 </body>
