@@ -5,67 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Admin Narapoi</title>
 <style>
-body{
-  margin:0;
-  background:#0b0b0b;
-  color:#fff;
-  font-family:system-ui;
-}
-.wrap{
-  max-width:480px;
-  margin:auto;
-  padding:16px;
-}
-input,textarea,button{
-  width:100%;
-  padding:12px;
-  margin-bottom:8px;
-  border-radius:10px;
-  border:none;
-  background:#161616;
-  color:#fff;
-}
-button{
-  background:#3b82f6;
-  font-weight:600;
-  cursor:pointer;
-}
-.downloads-container{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  margin-bottom:12px;
-}
-.download-row{
-  display:flex;
-  gap:6px;
-  background:#222;
-  border-radius:8px;
-  padding:6px;
-  align-items:center;
-}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:#0b0b0b;color:#fff;padding:16px}
+.wrap{max-width:480px;margin:auto;display:flex;flex-direction:column;gap:12px}
+input,textarea,button{border:none;border-radius:10px;padding:10px;color:#fff;background:#161616}
+textarea{resize:none}
+button{cursor:pointer;background:#3b82f6;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px}
+.downloads-container{display:flex;flex-direction:column;gap:6px}
+.download-row{display:flex;gap:6px;align-items:center;background:#222;padding:6px;border-radius:8px;cursor:grab}
 .download-row input{flex:1}
-.download-row button{
-  width:40px;
-  background:#ff3b3b;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:6px;
-  border-radius:6px;
-}
-.preview-btn{
-  background:#2563eb;
-  padding:12px;
-  border-radius:10px;
-  margin-top:6px;
-  font-weight:600;
-  text-align:center;
-  cursor:pointer;
-}
-.row{display:flex;gap:6px;margin-top:4px;}
-.row button{flex:1;display:flex;align-items:center;justify-content:center;gap:4px}
+.download-row button{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:#ff3b3b;padding:6px;border-radius:6px}
+.preview-btn{background:#2563eb;padding:12px;border-radius:10px;margin-top:6px;font-weight:600;text-align:center}
+.row{display:flex;gap:6px;margin-top:4px}
+.row button{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:8px}
 .dragging{opacity:.5}
+.history-card{background:#111;padding:8px;border-radius:10px;display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
+.link-container{display:flex;gap:6px}
+.link-container textarea{flex:1}
 </style>
 </head>
 <body>
@@ -78,17 +34,28 @@ button{
 
   <div>Tombol Download</div>
   <div class="downloads-container" id="downloads"></div>
-  <button onclick="addDownload()">Tambah tombol download</button>
+  <button onclick="addDownload()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#fff">
+      <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/>
+    </svg>
+    Tambah tombol download
+  </button>
 
-  <button onclick="save()">Simpan</button>
+  <button onclick="save()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#fff">
+      <path d="M5 5V19H19V5H5ZM17 17H7V7H17V17Z"/>
+    </svg>
+    Simpan
+  </button>
 
-  <p>Link hasil:</p>
-  <div style="display:flex;gap:6px;">
-    <textarea id="link" readonly style="flex:1"></textarea>
+  <div>Link hasil:</div>
+  <div class="link-container">
+    <textarea id="link" readonly></textarea>
     <button onclick="copyLink()">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="#fff">
-        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#fff">
+        <path d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM20 7H8C6.9 7 6 7.9 6 9V21C6 22.1 6.9 23 8 23H20C21.1 23 22 22.1 22 21V9C22 7.9 21.1 7 20 7ZM20 21H8V9H20V21Z"/>
       </svg>
+      Salin
     </button>
   </div>
 
@@ -103,9 +70,8 @@ button{
 const $ = id=>document.getElementById(id);
 let dragged=null;
 
-// ===== DOWNLOAD FIELD =====
 function addDownload(label='', url=''){
-  const d = document.createElement('div');
+  const d=document.createElement('div');
   d.className='download-row';
   d.draggable=true;
   d.innerHTML=`
@@ -113,29 +79,24 @@ function addDownload(label='', url=''){
     <input placeholder="Link" value="${url}">
     <button onclick="this.parentNode.remove()">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#fff">
-        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12Z"/>
       </svg>
     </button>`;
-
-  // Drag events (mouse)
   d.addEventListener('dragstart',()=>{dragged=d;d.classList.add('dragging')});
   d.addEventListener('dragend',()=>d.classList.remove('dragging'));
-  d.addEventListener('dragover', e=>{
+  d.addEventListener('dragover',e=>{
     e.preventDefault();
     const after=getDragAfterElement($('downloads'), e.clientY);
-    if(after==null) $('downloads').appendChild(dragged);
-    else $('downloads').insertBefore(dragged,after);
+    if(!after) $('downloads').appendChild(dragged);
+    else $('downloads').insertBefore(dragged, after);
   });
-
-  // Touch support
-  d.addEventListener('touchstart', e=>{dragged=d;});
-  d.addEventListener('touchmove', e=>{
+  d.addEventListener('touchstart',()=>{dragged=d;});
+  d.addEventListener('touchmove',e=>{
     const touch=e.touches[0];
     const after=getDragAfterElement($('downloads'), touch.clientY);
-    if(after==null) $('downloads').appendChild(dragged);
-    else $('downloads').insertBefore(dragged,after);
+    if(!after) $('downloads').appendChild(dragged);
+    else $('downloads').insertBefore(dragged, after);
   });
-
   $('downloads').appendChild(d);
 }
 function getDragAfterElement(container,y){
@@ -149,7 +110,6 @@ function getDragAfterElement(container,y){
 }
 addDownload();
 
-// ===== SAVE / GENERATE =====
 function save(){
   let id=$('id').value.trim();
   const title=$('title').value.trim();
@@ -173,15 +133,10 @@ function save(){
   });
 }
 
-// ===== COPY LINK =====
 function copyLink(){ $('link').select(); navigator.clipboard.writeText($('link').value); alert('Link disalin'); }
 
-// ===== PREVIEW =====
-function renderPreview(v){
-  $('preview').textContent=`Judul: ${v.title}\nLink player: ${v.src}\nDownload: ${v.downloads.map(d=>d.label).join(', ')}`;
-}
+function renderPreview(v){ $('preview').textContent=`Judul: ${v.title}\nLink player: ${v.src}\nDownload: ${v.downloads.map(d=>d.label).join(', ')}`; }
 
-// ===== HISTORY =====
 function saveHistory(data,id){
   let h=JSON.parse(localStorage.getItem('history')||'[]');
   h.unshift(data);
@@ -194,7 +149,7 @@ function renderHistory(){
   h.forEach((o,i)=>{
     const k=Object.keys(o)[0],v=o[k];
     const div=document.createElement('div');
-    div.className='card';
+    div.className='history-card';
     div.innerHTML=`<b>${k}</b> — ${v.title}
       <div class="row">
         <button onclick="previewHistory(${i})">
