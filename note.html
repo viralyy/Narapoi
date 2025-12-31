@@ -25,16 +25,19 @@ body{margin:0;background:#f3f4f6;font-family:system-ui,Arial}
 
 textarea{display:none;width:calc(100% - 20px);height:260px;margin:10px;padding:12px;border-radius:8px}
 
-.footer{display:flex;gap:10px;padding:12px;border-top:1px solid #ddd}
-.footer select,.footer button{flex:1;padding:10px;border-radius:8px;border:1px solid #ccc;font-weight:600}
+.footer{display:flex;flex-direction:column;gap:8px;padding:12px;border-top:1px solid #ddd}
+.footer select,.footer input,.footer button{
+  padding:10px;border-radius:8px;border:1px solid #ccc;font-weight:600;width:100%
+}
 button.publish{background:#dc2626;color:#fff;border:none}
 
 .section{max-width:720px;margin:16px auto;padding:0 6px}
 .card{background:#fff;padding:12px;border-radius:10px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;justify-content:space-between;gap:10px;align-items:center}
 .card span{font-size:13px;word-break:break-all}
 .card button{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#f9fafb;font-weight:600}
-.actions{display:flex;gap:6px}
+.actions{display:flex;gap:6px;flex-wrap:wrap}
 small{color:#666}
+.danger{background:#fee2e2;border-color:#fecaca;color:#991b1b}
 </style>
 </head>
 
@@ -97,10 +100,11 @@ small{color:#666}
   <textarea id="html"></textarea>
 
   <div class="footer">
-    <select id="visibility">
+    <select id="visibility" onchange="togglePassword()">
       <option value="public">Public</option>
       <option value="private">Private</option>
     </select>
+    <input id="password" placeholder="Password (private)" style="display:none">
     <button class="publish" onclick="publish()">Publish</button>
   </div>
 </div>
@@ -118,34 +122,41 @@ small{color:#666}
 <input type="file" id="imgPick" accept="image/*" hidden>
 
 <script>
-const editor = document.getElementById('editor');
-const html = document.getElementById('html');
-const links = document.getElementById('links');
-const historyBox = document.getElementById('history');
-const imgPick = document.getElementById('imgPick');
+const editor=document.getElementById('editor');
+const html=document.getElementById('html');
+const links=document.getElementById('links');
+const historyBox=document.getElementById('history');
+const imgPick=document.getElementById('imgPick');
 
-let notes = JSON.parse(localStorage.getItem('notes') || '[]');
-let tempLink = null;
+let notes=JSON.parse(localStorage.getItem('notes')||'[]');
+let tempLink=null;
 
-function cmd(c){document.execCommand(c,false,null)}
+function cmd(c){editor.focus();document.execCommand(c,false,null)}
 
-function pickImage(){imgPick.click()}
+function pickImage(){
+  editor.focus();
+  imgPick.click();
+}
+
 imgPick.onchange=e=>{
   const f=e.target.files[0];
   if(!f) return;
   const r=new FileReader();
-  r.onload=()=>document.execCommand('insertImage',false,r.result);
+  r.onload=()=>{
+    editor.focus();
+    document.execCommand('insertImage',false,r.result);
+  };
   r.readAsDataURL(f);
 };
 
 function showHTML(){
-  html.value = editor.innerHTML;
+  html.value=editor.innerHTML;
   editor.style.display='none';
   html.style.display='block';
   setTab(1);
 }
 function showEditor(){
-  editor.innerHTML = html.value;
+  editor.innerHTML=html.value;
   html.style.display='none';
   editor.style.display='block';
   setTab(0);
@@ -154,12 +165,14 @@ function setTab(i){
   document.querySelectorAll('.tab').forEach((t,n)=>t.classList.toggle('active',n===i));
 }
 
+function togglePassword(){
+  password.style.display = visibility.value==='private'?'block':'none';
+}
+
 function genID(){return Math.random().toString(36).slice(2,7)}
 
 function publish(){
-  if(html.style.display==='block'){
-    editor.innerHTML = html.value;
-  }
+  if(html.style.display==='block') editor.innerHTML=html.value;
 
   const id=genID();
   notes.unshift({
@@ -167,11 +180,32 @@ function publish(){
     title:title.value||'Untitled',
     content:editor.innerHTML,
     time:new Date().toLocaleString(),
-    visibility:visibility.value
+    visibility:visibility.value,
+    password:password.value||''
   });
   localStorage.setItem('notes',JSON.stringify(notes));
 
-  tempLink = `v/view.html?id=${id}`;
+  tempLink=`v/view.html?id=${id}`;
+  render();
+}
+
+function deleteNote(id){
+  if(!confirm('Yakin hapus note ini?')) return;
+  notes=notes.filter(n=>n.id!==id);
+  localStorage.setItem('notes',JSON.stringify(notes));
+  tempLink=null;
+  render();
+}
+
+function loadEdit(id){
+  const n=notes.find(x=>x.id===id);
+  if(!n) return;
+  title.value=n.title;
+  editor.innerHTML=n.content;
+  visibility.value=n.visibility;
+  password.value=n.password||'';
+  togglePassword();
+  tempLink=null;
   render();
 }
 
@@ -197,18 +231,10 @@ function render(){
         <div class="actions">
           <button onclick="window.open('v/view.html?id=${n.id}')">Lihat</button>
           <button onclick="loadEdit('${n.id}')">Edit</button>
+          <button class="danger" onclick="deleteNote('${n.id}')">Hapus</button>
         </div>
       </div>`;
   });
-}
-
-function loadEdit(id){
-  const n = notes.find(x=>x.id===id);
-  if(!n) return;
-  title.value = n.title;
-  editor.innerHTML = n.content;
-  tempLink = null;
-  render();
 }
 
 render();
