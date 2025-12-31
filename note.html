@@ -3,130 +3,207 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Note</title>
+<title>Note Editor</title>
 
 <style>
-*{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto}
-body{margin:0;background:#f5f5f5;color:#111}
-.container{max-width:700px;margin:auto;padding:12px}
-
-.title-input{
-  width:100%;
-  padding:10px 12px;
-  font-size:16px;
-  border:1px solid #ddd;
-  border-radius:8px;
-  margin-bottom:10px;
+body{
+  margin:0;
+  background:#f3f4f6;
+  font-family:system-ui,Arial;
 }
-
+.wrap{
+  max-width:720px;
+  margin:20px auto;
+  background:#fff;
+  border-radius:8px;
+  box-shadow:0 2px 10px rgba(0,0,0,.1);
+  overflow:hidden;
+}
+.header{
+  padding:12px;
+  border-bottom:1px solid #ddd;
+}
+.header input{
+  width:100%;
+  font-size:18px;
+  padding:10px;
+  border:1px solid #ccc;
+  border-radius:6px;
+}
+.tabs{
+  display:flex;
+  justify-content:flex-end;
+  border-bottom:1px solid #ddd;
+}
+.tab{
+  padding:8px 14px;
+  cursor:pointer;
+  font-weight:600;
+  background:#e5e7eb;
+  color:#555;
+}
+.tab.active{
+  background:#fff;
+  color:#dc2626;
+  border-bottom:2px solid #dc2626;
+}
 .toolbar{
   display:flex;
-  gap:6px;
-  flex-wrap:wrap;
-  margin-bottom:6px;
+  gap:10px;
+  padding:8px 10px;
+  border-bottom:1px solid #ddd;
 }
 .toolbar button{
-  width:36px;
-  height:36px;
-  border:1px solid #ddd;
-  background:#fff;
+  background:none;
+  border:none;
+  padding:6px;
   border-radius:6px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  cursor:pointer;
+}
+.toolbar button:hover{
+  background:#e5e7eb;
 }
 .toolbar svg{
-  width:18px;
-  height:18px;
+  width:20px;
+  height:20px;
   stroke:#111;
-  fill:none;
-  stroke-width:1.8;
 }
-
 .editor{
-  min-height:220px;
-  border:2px solid #4a90e2;
-  border-radius:10px;
-  padding:10px;
-  background:#fff;
-  overflow:auto;
-}
-.editor img{
-  max-width:100%;
-  height:auto;
-  display:block;
-  margin:8px auto;
+  min-height:320px;
+  padding:14px;
+  outline:none;
+  border:2px solid #2563eb;
+  margin:10px;
   border-radius:6px;
 }
-
-.actions{
+textarea{
+  display:none;
+  width:calc(100% - 20px);
+  height:320px;
+  margin:10px;
+}
+.footer{
   display:flex;
-  gap:8px;
-  margin-top:10px;
+  justify-content:center;
+  gap:10px;
+  padding:12px;
+  border-top:1px solid #ddd;
 }
 select,button.publish{
-  padding:8px 12px;
-  border-radius:8px;
-  border:1px solid #ddd;
+  padding:8px 14px;
+  border-radius:6px;
+  border:none;
+  font-weight:600;
 }
 button.publish{
-  background:#e53935;
+  background:#dc2626;
   color:#fff;
-  border:none;
 }
-
-.section{margin-top:18px}
+.section{
+  max-width:720px;
+  margin:20px auto;
+}
 .card{
   background:#fff;
+  padding:12px;
   border-radius:8px;
-  padding:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-top:6px;
-  gap:10px;
+  margin-bottom:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
 }
-.card span{font-size:13px;word-break:break-all}
-.card button{
-  padding:6px 10px;
-  border-radius:6px;
-  border:1px solid #ddd;
-  background:#fafafa;
+.card a{
+  color:#2563eb;
+  text-decoration:none;
+  word-break:break-all;
 }
+small{color:#666}
 </style>
 </head>
-
 <body>
-<div class="container">
 
-<input id="title" class="title-input" placeholder="Title">
+<div class="wrap">
+  <div class="header">
+    <input id="title" placeholder="Title">
+  </div>
 
-<div class="toolbar">
-  <button onclick="cmd('bold')">
-    <svg viewBox="0 0 24 24"><path d="M7 4h6a4 4 0 010 8H7z"/><path d="M7 12h7a4 4 0 010 8H7z"/></svg>
-  </button>
+  <div class="tabs">
+    <div class="tab active" onclick="showEditor()">EDITOR</div>
+    <div class="tab" onclick="showHTML()">HTML</div>
+  </div>
 
-  <button onclick="cmd('italic')">
-    <svg viewBox="0 0 24 24"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
-  </button>
+  <div class="toolbar">
+    <!-- Bold -->
+    <button onclick="cmd('bold')" title="Bold">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+        <path d="M6 4h7a4 4 0 0 1 0 8H6z"/>
+        <path d="M6 12h8a4 4 0 0 1 0 8H6z"/>
+      </svg>
+    </button>
 
-  <button onclick="cmd('underline')">
-    <svg viewBox="0 0 24 24"><path d="M6 4v6a6 6 0 0012 0V4"/><line x1="4" y1="20" x2="20" y2="20"/></svg>
-  </button>
+    <!-- Align -->
+    <button onclick="cmd('justifyLeft')" title="Align Left">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="15" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
 
-  <button onclick="insertImage()">
-    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 17l-5-5-4 4-2-2-5 5"/></svg>
-  </button>
-</div>
+    <!-- Image -->
+    <button onclick="insertImage()" title="Image">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <circle cx="8" cy="8" r="2"/>
+        <path d="M21 15l-5-5L5 21"/>
+      </svg>
+    </button>
 
-<div id="editor" class="editor" contenteditable></div>
+    <!-- Link -->
+    <button onclick="insertLink()" title="Link">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+        <path d="M10 13a5 5 0 0 1 0-7l2-2a5 5 0 0 1 7 7l-1 1"/>
+        <path d="M14 11a5 5 0 0 1 0 7l-2 2a5 5 0 0 1-7-7l1-1"/>
+      </svg>
+    </button>
 
-<div class="actions">
-  <select id="visibility">
-    <option value="public">Public</option>
-    <option value="password">Password</option>
-  </select>
-  <button class="publish" onclick="publish()">Publish</button>
+    <!-- List -->
+    <button onclick="cmd('insertUnorderedList')" title="List">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+        <line x1="8" y1="6" x2="21" y2="6"/>
+        <line x1="8" y1="12" x2="21" y2="12"/>
+        <line x1="8" y1="18" x2="21" y2="18"/>
+        <circle cx="4" cy="6" r="1"/>
+        <circle cx="4" cy="12" r="1"/>
+        <circle cx="4" cy="18" r="1"/>
+      </svg>
+    </button>
+
+    <!-- Undo -->
+    <button onclick="cmd('undo')" title="Undo">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+        <path d="M9 14l-4-4 4-4"/>
+        <path d="M20 20a8 8 0 0 0-8-8H5"/>
+      </svg>
+    </button>
+
+    <!-- More -->
+    <button title="More">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="5" cy="12" r="2"/>
+        <circle cx="12" cy="12" r="2"/>
+        <circle cx="19" cy="12" r="2"/>
+      </svg>
+    </button>
+  </div>
+
+  <div id="editor" class="editor" contenteditable="true"></div>
+  <textarea id="html"></textarea>
+
+  <div class="footer">
+    <select>
+      <option>Public</option>
+    </select>
+    <button class="publish" onclick="publish()">Publish</button>
+  </div>
 </div>
 
 <div class="section">
@@ -139,92 +216,58 @@ button.publish{
   <div id="history"></div>
 </div>
 
-</div>
-
-<input type="file" id="imgPicker" accept="image/*" hidden>
-
 <script>
-const editor = document.getElementById("editor");
-const imgPicker = document.getElementById("imgPicker");
-const links = document.getElementById("links");
-const historyBox = document.getElementById("history");
+let notes = JSON.parse(localStorage.getItem('notes') || '[]');
 
-let notes = JSON.parse(localStorage.getItem("notes")||"[]");
-
-function cmd(c){document.execCommand(c,false,null);}
-
+function cmd(c){document.execCommand(c,false,null)}
+function insertLink(){
+  const u=prompt('URL');
+  if(u) document.execCommand('createLink',false,u);
+}
 function insertImage(){
-  imgPicker.click();
+  const u=prompt('Image URL');
+  if(u) document.execCommand('insertImage',false,u);
 }
-
-imgPicker.onchange=e=>{
-  const f=e.target.files[0];
-  if(!f) return;
-  const r=new FileReader();
-  r.onload=()=>{
-    document.execCommand("insertImage",false,r.result);
-  }
-  r.readAsDataURL(f);
+function showHTML(){
+  html.value=editor.innerHTML;
+  editor.style.display='none';
+  html.style.display='block';
+  setTab(1);
 }
-
-function genID(){
-  return Math.random().toString(36).slice(2,7);
+function showEditor(){
+  editor.innerHTML=html.value;
+  html.style.display='none';
+  editor.style.display='block';
+  setTab(0);
 }
-
-function publish(){
-  let pass="";
-  if(visibility.value==="password"){
-    pass=prompt("Masukkan password");
-  }
-
-  const note={
-    id:genID(),
-    title:title.value||"(No Title)",
-    content:editor.innerHTML,
-    time:new Date().toLocaleString(),
-    password:pass
-  };
-
-  notes.unshift(note);
-  localStorage.setItem("notes",JSON.stringify(notes));
-  render();
-}
-
-function render(){
-  links.innerHTML="";
-  historyBox.innerHTML="";
-
-  notes.forEach((n,i)=>{
-    const url=`v/view.html?id=${n.id}`;
-
-    if(i===0){
-      links.innerHTML=`
-        <div class="card">
-          <span>${url}</span>
-          <button onclick="copy('${url}')">Salin</button>
-        </div>`;
-    }
-
-    historyBox.innerHTML+=`
-      <div class="card">
-        <div>
-          <b>${n.title}</b><br>
-          <small>${n.time}</small>
-        </div>
-        <button onclick="openLink('${url}')">Buka</button>
-      </div>`;
+function setTab(i){
+  document.querySelectorAll('.tab').forEach((t,n)=>{
+    t.classList.toggle('active',n===i);
   });
 }
-
-function copy(t){
-  navigator.clipboard.writeText(t);
+function publish(){
+  notes.unshift({
+    id:Date.now(),
+    title:title.value||'Untitled',
+    content:editor.innerHTML,
+    time:new Date().toLocaleString()
+  });
+  localStorage.setItem('notes',JSON.stringify(notes));
+  render();
 }
-
-function openLink(u){
-  window.open(u,"_blank");
+function render(){
+  links.innerHTML='';
+  history.innerHTML='';
+  notes.forEach(n=>{
+    const link=`v/view.html?id=${n.id}`;
+    links.innerHTML+=`
+      <div class="card"><a href="${link}" target="_blank">${link}</a></div>`;
+    history.innerHTML+=`
+      <div class="card"><b>${n.title}</b><br><small>${n.time}</small></div>`;
+  });
 }
-
 render();
 </script>
+
 </body>
 </html>
