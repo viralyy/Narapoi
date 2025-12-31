@@ -185,7 +185,7 @@ function publish(){
   });
   localStorage.setItem('notes',JSON.stringify(notes));
 
-  tempLink=`v/view.html?id=${id}`;
+  tempLink=`narapoi.pages.dev/v/view.html?id=${id}`;
   render();
 }
 
@@ -229,7 +229,7 @@ function render(){
           <small>${n.time}</small>
         </div>
         <div class="actions">
-          <button onclick="window.open('v/view.html?id=${n.id}')">Lihat</button>
+          <button onclick="window.open('narapoi.pages.dev/v/view.html?id=${n.id}')">Lihat</button>
           <button onclick="loadEdit('${n.id}')">Edit</button>
           <button class="danger" onclick="deleteNote('${n.id}')">Hapus</button>
         </div>
