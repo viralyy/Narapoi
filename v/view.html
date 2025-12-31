@@ -2,50 +2,190 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>View Note</title>
+
 <style>
 body{
   margin:0;
-  background:#0b0b0b;
-  color:#fff;
+  background:#f3f4f6;
   font-family:system-ui,Arial;
 }
-.container{
-  max-width:600px;
-  margin:auto;
-  padding:16px;
+.wrap{
+  max-width:720px;
+  margin:14px auto;
+  background:#fff;
+  border-radius:10px;
+  box-shadow:0 2px 10px rgba(0,0,0,.1);
+  overflow:hidden;
 }
-.box{
-  background:#111;
+.header{
   padding:14px;
-  border-radius:8px;
-  white-space:pre-wrap;
+  border-bottom:1px solid #e5e7eb;
 }
-a{
-  display:inline-block;
-  margin-top:14px;
-  color:#60a5fa;
-  text-decoration:none;
+.header h1{
+  margin:0 0 6px;
+  font-size:20px;
+}
+.meta{
+  display:flex;
+  gap:14px;
+  font-size:13px;
+  color:#555;
+  flex-wrap:wrap;
+}
+.content{
+  padding:14px;
+}
+.content img{
+  max-width:100%;
+  height:auto;
+  display:block;
+  margin:10px auto;
+  border-radius:8px;
+}
+.lock{
+  padding:20px;
+  text-align:center;
+}
+.lock input{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  margin-top:10px;
+}
+.lock button{
+  margin-top:10px;
+  padding:10px;
+  width:100%;
+  border-radius:8px;
+  border:none;
+  background:#dc2626;
+  color:#fff;
+  font-weight:600;
+}
+.share{
+  display:flex;
+  gap:8px;
+  padding:12px;
+  border-top:1px solid #e5e7eb;
+  flex-wrap:wrap;
+}
+.share button{
+  flex:1;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  background:#f9fafb;
+  font-weight:600;
 }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>📄 Catatan</h1>
-  <div class="box" id="content">Loading...</div>
-  <a href="../note.html">← Kembali</a>
+<div class="wrap" id="app" style="display:none">
+  <div class="header">
+    <h1 id="title"></h1>
+    <div class="meta">
+      <span id="time"></span>
+      <span>Views: <b id="views">0</b></span>
+      <span>Online: <b id="online">0</b></span>
+    </div>
+  </div>
+
+  <div class="content" id="content"></div>
+
+  <div class="share">
+    <button onclick="shareWA()">WhatsApp</button>
+    <button onclick="shareTG()">Telegram</button>
+    <button onclick="shareFB()">Facebook</button>
+    <button onclick="copyLink()">Salin Link</button>
+  </div>
 </div>
 
-<script>
-const params = new URLSearchParams(location.search);
-const id = params.get('id');
+<div class="wrap lock" id="lock" style="display:none">
+  <h3>Note Terkunci</h3>
+  <input type="password" id="pass" placeholder="Masukkan password">
+  <button onclick="unlock()">Buka Note</button>
+</div>
 
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, get, set, onValue, onDisconnect, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC4KJsPLfoEiZSKQUZHrGzZh6-Fv_0Q7P0",
+  authDomain: "views-counter-610fa.firebaseapp.com",
+  databaseURL: "https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "views-counter-610fa",
+  storageBucket: "views-counter-610fa.firebasestorage.app",
+  messagingSenderId: "998762153750",
+  appId: "1:998762153750:web:7113cd0bba422204fa7237"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+const id = new URLSearchParams(location.search).get('id');
 const notes = JSON.parse(localStorage.getItem('notes') || '[]');
-const note = notes.find(n => n.id == id);
+const note = notes.find(n=>n.id===id);
 
-content.textContent = note ? note.text : 'Catatan tidak ditemukan';
+if(!note){
+  document.body.innerHTML='<h2 style="text-align:center">Note tidak ditemukan</h2>';
+  throw '';
+}
+
+title.textContent = note.title;
+time.textContent = note.time;
+content.innerHTML = note.content;
+
+if(note.visibility === 'private'){
+  appBox(false);
+}else{
+  appBox(true);
+}
+
+function appBox(show){
+  document.getElementById('app').style.display = show?'block':'none';
+  document.getElementById('lock').style.display = show?'none':'block';
+}
+
+window.unlock = ()=>{
+  if(pass.value === note.password){
+    appBox(true);
+    initFirebase();
+  }else{
+    alert('Password salah');
+  }
+};
+
+function initFirebase(){
+  const viewRef = ref(db, `views/${id}`);
+  set(viewRef, increment(1));
+
+  onValue(viewRef, s=>{
+    views.textContent = s.val() || 0;
+  });
+
+  const userId = Math.random().toString(36).slice(2);
+  const onlineRef = ref(db, `online/${id}/${userId}`);
+  set(onlineRef, true);
+  onDisconnect(onlineRef).remove();
+
+  onValue(ref(db, `online/${id}`), s=>{
+    online.textContent = s.exists() ? Object.keys(s.val()).length : 0;
+  });
+}
+
+if(note.visibility === 'public'){
+  initFirebase();
+}
+
+window.shareWA=()=>window.open(`https://wa.me/?text=${encodeURIComponent(location.href)}`);
+window.shareTG=()=>window.open(`https://t.me/share/url?url=${encodeURIComponent(location.href)}`);
+window.shareFB=()=>window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href)}`);
+window.copyLink=()=>navigator.clipboard.writeText(location.href);
 </script>
 
 </body>
