@@ -6,62 +6,115 @@
 <title>View Note</title>
 
 <style>
-*{box-sizing:border-box}
 body{
   margin:0;
-  background:#0b0d12;
-  color:#e5e7eb;
+  background:#f3f4f6;
   font-family:system-ui,Arial;
 }
-.wrap{max-width:760px;margin:16px auto;padding:14px}
-.card{
-  background:#111827;
+.wrap{
+  max-width:720px;
+  margin:14px auto;
+  background:#fff;
   border-radius:10px;
-  padding:16px;
+  box-shadow:0 2px 10px rgba(0,0,0,.1);
+  overflow:hidden;
 }
-h1{margin:0 0 6px;font-size:22px}
-.meta{display:flex;gap:12px;font-size:13px;color:#9ca3af;margin-bottom:14px}
-.content,.content *{pointer-events:auto}
-.content img{max-width:100%;height:auto;border-radius:8px}
-.share{display:flex;gap:10px;margin-top:16px}
-.share button{flex:1;padding:10px;border:0;border-radius:8px;background:#1f2937;color:#fff}
-.lock{text-align:center;padding:30px}
-.lock input{width:100%;padding:10px;border-radius:8px;border:0;margin:10px 0}
-.lock button{padding:10px 16px;border:0;border-radius:8px;background:#2563eb;color:#fff}
+.header{
+  padding:14px;
+  border-bottom:1px solid #e5e7eb;
+}
+.header h1{
+  margin:0 0 6px;
+  font-size:20px;
+}
+.meta{
+  display:flex;
+  gap:14px;
+  font-size:13px;
+  color:#555;
+  flex-wrap:wrap;
+}
+.content{
+  padding:14px;
+}
+.content img{
+  max-width:100%;
+  height:auto;
+  display:block;
+  margin:10px auto;
+  border-radius:8px;
+}
+.lock{
+  padding:20px;
+  text-align:center;
+}
+.lock input{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  margin-top:10px;
+}
+.lock button{
+  margin-top:10px;
+  padding:10px;
+  width:100%;
+  border-radius:8px;
+  border:none;
+  background:#dc2626;
+  color:#fff;
+  font-weight:600;
+}
+.share{
+  display:flex;
+  gap:8px;
+  padding:12px;
+  border-top:1px solid #e5e7eb;
+  flex-wrap:wrap;
+}
+.share button{
+  flex:1;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  background:#f9fafb;
+  font-weight:600;
+}
 </style>
 </head>
 <body>
 
-<div class="wrap">
-  <div class="card" id="app" style="display:none">
+<div class="wrap" id="app" style="display:none">
+  <div class="header">
     <h1 id="title"></h1>
     <div class="meta">
       <span id="time"></span>
       <span>Views: <b id="views">0</b></span>
       <span>Online: <b id="online">0</b></span>
     </div>
-    <div id="content" class="content"></div>
-
-    <div class="share">
-      <button onclick="wa()">WhatsApp</button>
-      <button onclick="tg()">Telegram</button>
-      <button onclick="copy()">Salin</button>
-    </div>
   </div>
 
-  <div class="card lock" id="lock" style="display:none">
-    <h2>Private Note</h2>
-    <input id="pass" type="password" placeholder="Password">
-    <button onclick="unlock()">Buka</button>
+  <div class="content" id="content"></div>
+
+  <div class="share">
+    <button onclick="shareWA()">WhatsApp</button>
+    <button onclick="shareTG()">Telegram</button>
+    <button onclick="shareFB()">Facebook</button>
+    <button onclick="copyLink()">Salin Link</button>
   </div>
 </div>
 
-<!-- FIREBASE COMPAT -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<div class="wrap lock" id="lock" style="display:none">
+  <h3>Note Terkunci</h3>
+  <input type="password" id="pass" placeholder="Masukkan password">
+  <button onclick="unlock()">Buka Note</button>
+</div>
 
-<script>
-firebase.initializeApp({
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, get, set, onValue, onDisconnect, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
   apiKey: "AIzaSyC4KJsPLfoEiZSKQUZHrGzZh6-Fv_0Q7P0",
   authDomain: "views-counter-610fa.firebaseapp.com",
   databaseURL: "https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -69,50 +122,70 @@ firebase.initializeApp({
   storageBucket: "views-counter-610fa.firebasestorage.app",
   messagingSenderId: "998762153750",
   appId: "1:998762153750:web:7113cd0bba422204fa7237"
-});
+};
 
-const db=firebase.database();
-const id=new URLSearchParams(location.search).get('id');
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-db.ref('notes/'+id).once('value').then(s=>{
-  if(!s.exists()){document.body.innerHTML='NOT FOUND';return;}
-  const n=s.val();
+const id = new URLSearchParams(location.search).get('id');
+const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+const note = notes.find(n=>n.id===id);
 
-  if(n.visibility==='private'){
-    lock.style.display='block';
-    window.unlock=()=>{
-      if(pass.value===n.password) show(n);
-      else alert('Password salah');
-    }
-  }else show(n);
-});
-
-function show(n){
-  lock.style.display='none';
-  app.style.display='block';
-  title.textContent=n.title;
-  time.textContent=n.time;
-  content.innerHTML=n.content;
-  viewsCount();
-  onlineCount();
+if(!note){
+  document.body.innerHTML='<h2 style="text-align:center">Note tidak ditemukan</h2>';
+  throw '';
 }
 
-function viewsCount(){
-  const r=db.ref('views/'+id);
-  r.transaction(v=>(v||0)+1);
-  r.on('value',s=>views.textContent=s.val()||0);
+title.textContent = note.title;
+time.textContent = note.time;
+content.innerHTML = note.content;
+
+if(note.visibility === 'private'){
+  appBox(false);
+}else{
+  appBox(true);
 }
-function onlineCount(){
-  const u=db.ref('online/'+id+'/'+Math.random().toString(36).slice(2));
-  u.set(1);u.onDisconnect().remove();
-  db.ref('online/'+id).on('value',s=>{
-    online.textContent=s.exists()?Object.keys(s.val()).length:0;
+
+function appBox(show){
+  document.getElementById('app').style.display = show?'block':'none';
+  document.getElementById('lock').style.display = show?'none':'block';
+}
+
+window.unlock = ()=>{
+  if(pass.value === note.password){
+    appBox(true);
+    initFirebase();
+  }else{
+    alert('Password salah');
+  }
+};
+
+function initFirebase(){
+  const viewRef = ref(db, `views/${id}`);
+  set(viewRef, increment(1));
+
+  onValue(viewRef, s=>{
+    views.textContent = s.val() || 0;
+  });
+
+  const userId = Math.random().toString(36).slice(2);
+  const onlineRef = ref(db, `online/${id}/${userId}`);
+  set(onlineRef, true);
+  onDisconnect(onlineRef).remove();
+
+  onValue(ref(db, `online/${id}`), s=>{
+    online.textContent = s.exists() ? Object.keys(s.val()).length : 0;
   });
 }
 
-function copy(){navigator.clipboard.writeText(location.href);alert('Disalin')}
-function wa(){open('https://wa.me/?text='+encodeURIComponent(location.href))}
-function tg(){open('https://t.me/share/url?url='+encodeURIComponent(location.href))}
+if(note.visibility === 'public'){
+  initFirebase();
+}
+
+window.shareWA=()=>window.open(`https://wa.me/?text=${encodeURIComponent(location.href)}`);
+window.shareTG=()=>window.open(`https://t.me/share/url?url=${encodeURIComponent(location.href)}`);
+window.shareFB=()=>window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href)}`);
+window.copyLink=()=>navigator.clipboard.writeText(location.href);
 </script>
 
 </body>
