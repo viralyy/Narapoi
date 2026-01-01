@@ -8,31 +8,43 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-/* === CSS ASLI LU (TIDAK DIUBAH) === */
+*{box-sizing:border-box}
 body{margin:0;background:#f3f4f6;font-family:system-ui,Arial}
 .wrap{max-width:720px;margin:12px auto;background:#fff;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.1);overflow:hidden}
 .header{padding:12px;border-bottom:1px solid #ddd}
-.header input{width:100%;font-size:16px;padding:10px 12px;border:1px solid #ccc;border-radius:8px}
+.header input{
+  width:100%;
+  max-width:100%;
+  font-size:16px;
+  padding:10px 12px;
+  border:1px solid #ccc;
+  border-radius:8px;
+}
+
 .tabs{display:flex;justify-content:flex-end;border-bottom:1px solid #ddd}
 .tab{padding:8px 14px;font-weight:600;background:#e5e7eb;color:#555;cursor:pointer}
 .tab.active{background:#fff;color:#dc2626;border-bottom:2px solid #dc2626}
+
 .toolbar{display:flex;gap:6px;padding:8px;border-bottom:1px solid #ddd;overflow-x:auto}
-.toolbar button{background:none;border:none;padding:6px;border-radius:6px}
+.toolbar button{background:none;border:none;padding:6px;border-radius:6px;cursor:pointer}
 .toolbar button:hover{background:#e5e7eb}
-.toolbar svg{width:20px;height:20px;stroke:#111}
+
 .editor{min-height:260px;padding:12px;border:2px solid #2563eb;margin:10px;border-radius:8px;outline:none}
-.editor img{max-width:100%;height:auto;display:block;margin:8px auto;border-radius:6px}
+.editor img{max-width:100%;display:block;margin:8px auto;border-radius:6px}
+
 textarea{display:none;width:calc(100% - 20px);height:260px;margin:10px;padding:12px;border-radius:8px}
+
 .footer{display:flex;flex-direction:column;gap:8px;padding:12px;border-top:1px solid #ddd}
-.footer select,.footer input,.footer button{padding:10px;border-radius:8px;border:1px solid #ccc;font-weight:600;width:100%}
-button.publish{background:#dc2626;color:#fff;border:none}
+.footer select,.footer input,.footer button{
+  padding:10px;border-radius:8px;border:1px solid #ccc;font-weight:600;width:100%
+}
+button.publish{background:#dc2626;color:#fff;border:none;cursor:pointer}
+
 .section{max-width:720px;margin:16px auto;padding:0 6px}
 .card{background:#fff;padding:12px;border-radius:10px;margin-bottom:10px;box-shadow:0 2px 8px rgba(0,0,0,.08);display:flex;justify-content:space-between;gap:10px;align-items:center}
-.card span{font-size:13px;word-break:break-all}
-.card button{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#f9fafb;font-weight:600}
-.actions{display:flex;gap:6px;flex-wrap:wrap}
-small{color:#666}
+.actions{display:flex;gap:6px}
 .danger{background:#fee2e2;border-color:#fecaca;color:#991b1b}
+small{color:#666}
 </style>
 </head>
 
@@ -44,28 +56,28 @@ small{color:#666}
   </div>
 
   <div class="tabs">
-    <div class="tab active" onclick="showEditor()">EDITOR</div>
-    <div class="tab" onclick="showHTML()">HTML</div>
+    <div class="tab active" id="tabEditor">EDITOR</div>
+    <div class="tab" id="tabHTML">HTML</div>
   </div>
 
   <div class="toolbar">
-    <button onclick="cmd('bold')">B</button>
-    <button onclick="cmd('justifyLeft')">≡</button>
-    <button onclick="pickImage()">IMG</button>
-    <button onclick="cmd('insertUnorderedList')">•</button>
-    <button onclick="cmd('undo')">↶</button>
+    <button data-cmd="bold">B</button>
+    <button data-cmd="justifyLeft">≡</button>
+    <button id="imgBtn">IMG</button>
+    <button data-cmd="insertUnorderedList">•</button>
+    <button data-cmd="undo">↶</button>
   </div>
 
   <div id="editor" class="editor" contenteditable="true"></div>
   <textarea id="html"></textarea>
 
   <div class="footer">
-    <select id="visibility" onchange="togglePassword()">
+    <select id="visibility">
       <option value="public">Public</option>
       <option value="private">Private</option>
     </select>
     <input id="password" placeholder="Password (private)" style="display:none">
-    <button class="publish" onclick="publish()">Publish</button>
+    <button class="publish" id="publishBtn">Publish</button>
   </div>
 </div>
 
@@ -82,41 +94,49 @@ small{color:#666}
 <input type="file" id="imgPick" accept="image/*" hidden>
 
 <script>
-/* ===== SUPABASE ===== */
 const supabase = window.supabase.createClient(
   "https://reglvenhbvmyqujoydil.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2x2ZW5oYnZteXF1am95ZGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyMzc2MDQsImV4cCI6MjA4MjgxMzYwNH0.h-UEIR98TT8TynjraSQi7iwUrnCQ0nLuFJKaHPbOSUc"
 );
 
-const editor=editor=document.getElementById('editor');
+const editor=document.getElementById('editor');
 const html=document.getElementById('html');
+const visibility=document.getElementById('visibility');
+const password=document.getElementById('password');
+const title=document.getElementById('title');
 const links=document.getElementById('links');
 const historyBox=document.getElementById('history');
 const imgPick=document.getElementById('imgPick');
 
-let tempLink=null;
+document.querySelectorAll('[data-cmd]').forEach(b=>{
+  b.onclick=()=>{editor.focus();document.execCommand(b.dataset.cmd)}
+});
 
-function cmd(c){editor.focus();document.execCommand(c,false,null)}
-function pickImage(){imgPick.click()}
+document.getElementById('imgBtn').onclick=()=>imgPick.click();
 imgPick.onchange=e=>{
-  const f=e.target.files[0];
   const r=new FileReader();
   r.onload=()=>document.execCommand('insertImage',false,r.result);
-  r.readAsDataURL(f);
+  r.readAsDataURL(e.target.files[0]);
 };
 
-function showHTML(){html.value=editor.innerHTML;editor.style.display='none';html.style.display='block'}
-function showEditor(){editor.innerHTML=html.value;html.style.display='none';editor.style.display='block'}
+document.getElementById('tabHTML').onclick=()=>{
+  html.value=editor.innerHTML;
+  editor.style.display='none';
+  html.style.display='block';
+};
 
-function togglePassword(){
-  password.style.display=visibility.value==='private'?'block':'none'
-}
+document.getElementById('tabEditor').onclick=()=>{
+  editor.innerHTML=html.value;
+  html.style.display='none';
+  editor.style.display='block';
+};
 
-function genID(){return Math.random().toString(36).slice(2,7)}
+visibility.onchange=()=>password.style.display=
+  visibility.value==='private'?'block':'none';
 
-async function publish(){
+document.getElementById('publishBtn').onclick=async()=>{
   if(html.style.display==='block') editor.innerHTML=html.value;
-  const id=genID();
+  const id=Math.random().toString(36).slice(2,7);
 
   await supabase.from('notes').insert({
     id,
@@ -127,45 +147,23 @@ async function publish(){
     password:password.value||''
   });
 
-  tempLink=`https://narapoi.pages.dev/v/view.html?id=${id}`;
+  links.innerHTML=`<div class="card"><span>https://narapoi.pages.dev/v/view.html?id=${id}</span></div>`;
   load();
-}
+};
 
 async function load(){
-  links.innerHTML='';
   historyBox.innerHTML='';
-
-  if(tempLink){
-    links.innerHTML=`
-      <div class="card">
-        <span>${tempLink}</span>
-        <button onclick="navigator.clipboard.writeText('${tempLink}')">Salin</button>
-      </div>`;
-  }
-
   const {data}=await supabase.from('notes').select('*').order('time',{ascending:false});
-
   data.forEach(n=>{
     historyBox.innerHTML+=`
       <div class="card">
-        <div>
-          <b>${n.title}</b><br>
-          <small>${n.time}</small>
-        </div>
+        <div><b>${n.title}</b><br><small>${n.time}</small></div>
         <div class="actions">
           <button onclick="window.open('v/view.html?id=${n.id}')">Lihat</button>
-          <button class="danger" onclick="del('${n.id}')">Hapus</button>
         </div>
       </div>`;
   });
 }
-
-async function del(id){
-  if(!confirm('Hapus note?'))return;
-  await supabase.from('notes').delete().eq('id',id);
-  load();
-}
-
 load();
 </script>
 
