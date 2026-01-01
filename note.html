@@ -6,57 +6,27 @@
 <title>Note Editor</title>
 
 <style>
-/* ===================================================
-   RESET & BASE
-=================================================== */
+/* CSS sama persis versi rapih lo sebelumnya */
 *{box-sizing:border-box}
 body{margin:0;background:#f3f4f6;font-family:system-ui,Arial,sans-serif;color:#111}
-
-/* ===================================================
-   LAYOUT
-=================================================== */
 .wrap{max-width:720px;margin:12px auto;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.1)}
 .section{max-width:720px;margin:16px auto;padding:0 6px}
-
-/* ===================================================
-   HEADER
-=================================================== */
 .header{padding:12px;border-bottom:1px solid #ddd}
 .header input{width:100%;padding:10px 12px;font-size:16px;border:1px solid #ccc;border-radius:8px;outline:none}
-
-/* ===================================================
-   TABS
-=================================================== */
 .tabs{display:flex;justify-content:flex-end;border-bottom:1px solid #ddd}
 .tab{padding:8px 14px;font-weight:600;cursor:pointer;background:#e5e7eb;color:#555}
 .tab.active{background:#fff;color:#dc2626;border-bottom:2px solid #dc2626}
-
-/* ===================================================
-   TOOLBAR
-=================================================== */
 .toolbar{display:flex;gap:6px;padding:8px;border-bottom:1px solid #ddd;overflow-x:auto}
 .toolbar button{background:none;border:none;padding:6px;border-radius:6px;cursor:pointer}
 .toolbar button:hover{background:#e5e7eb}
 .toolbar svg{width:20px;height:20px;stroke:#111}
-
-/* ===================================================
-   EDITOR
-=================================================== */
 .editor,textarea{width:calc(100% - 20px);min-height:260px;margin:10px;padding:12px;border-radius:8px;border:2px solid #2563eb;outline:none}
 .editor{display:block}
 .editor img{max-width:100%;height:auto;display:block;margin:8px auto;border-radius:6px}
 textarea{display:none;resize:vertical}
-
-/* ===================================================
-   FOOTER / PUBLISH
-=================================================== */
 .footer{display:flex;flex-direction:column;gap:8px;padding:12px;border-top:1px solid #ddd}
 .footer select,.footer input,.footer button{width:100%;padding:10px;font-weight:600;border-radius:8px;border:1px solid #ccc}
 .footer button.publish{background:#dc2626;color:#fff;border:none;cursor:pointer}
-
-/* ===================================================
-   CARD / HISTORY / LINK
-=================================================== */
 .card{background:#fff;padding:12px;border-radius:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .card span{font-size:13px;word-break:break-all}
 .actions{display:flex;gap:6px;flex-wrap:wrap}
@@ -65,14 +35,10 @@ textarea{display:none;resize:vertical}
 small{color:#666}
 </style>
 </head>
-
 <body>
 
 <div class="wrap">
-  <div class="header">
-    <input id="title" placeholder="Title">
-  </div>
-
+  <div class="header"><input id="title" placeholder="Title"></div>
   <div class="tabs">
     <div class="tab active" onclick="showEditor()">EDITOR</div>
     <div class="tab" onclick="showHTML()">HTML</div>
@@ -121,82 +87,57 @@ small{color:#666}
 
 <input type="file" id="imgPick" accept="image/*" hidden>
 
-<!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.26.0/dist/supabase.min.js"></script>
-
 <script>
-// Supabase Init
+// Supabase
 const supabaseUrl = 'https://reglvenhbvmyqujoydil.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2x2ZW5oYnZteXF1am95ZGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyMzc2MDQsImV4cCI6MjA4MjgxMzYwNH0.h-UEIR98TT8TynjraSQi7iwUrnCQ0nLuFJKaHPbOSUc'
 const supabase = Supabase.createClient(supabaseUrl,supabaseKey)
-const tableName = 'notes'
+const tableName='notes'
 
-const editor=document.getElementById('editor');
-const html=document.getElementById('html');
-const links=document.getElementById('links');
-const historyBox=document.getElementById('history');
-const imgPick=document.getElementById('imgPick');
-const title=document.getElementById('title');
-const visibility=document.getElementById('visibility');
-const password=document.getElementById('password');
+const editor=document.getElementById('editor')
+const html=document.getElementById('html')
+const links=document.getElementById('links')
+const historyBox=document.getElementById('history')
+const imgPick=document.getElementById('imgPick')
+const title=document.getElementById('title')
+const visibility=document.getElementById('visibility')
+const password=document.getElementById('password')
 
-let notes=[]; // Local cache
-let tempLink=null;
+let notes=[]
+let tempLink=null
 
-// =======================
-// Basic Editor Commands
-// =======================
 function cmd(c){editor.focus();document.execCommand(c,false,null)}
-
-function pickImage(){
-  editor.focus();
-  imgPick.value='';
-  imgPick.click();
+function pickImage(){editor.focus();imgPick.value='';imgPick.click()}
+imgPick.onchange=e=>{
+  const f=e.target.files[0];if(!f)return
+  const r=new FileReader()
+  r.onload=()=>{editor.focus();document.execCommand('insertImage',false,r.result)}
+  r.readAsDataURL(f)
 }
 
-imgPick.onchange=e=>{
-  const f=e.target.files[0];
-  if(!f) return;
-  const r=new FileReader();
-  r.onload=()=>{
-    editor.focus();
-    document.execCommand('insertImage',false,r.result);
-  };
-  r.readAsDataURL(f);
-};
-
-// =======================
-// Tab Switching
-// =======================
+// TAB
 function showHTML(){html.value=editor.innerHTML;editor.style.display='none';html.style.display='block';setTab(1)}
 function showEditor(){editor.innerHTML=html.value;html.style.display='none';editor.style.display='block';setTab(0)}
 function setTab(i){document.querySelectorAll('.tab').forEach((t,n)=>t.classList.toggle('active',n===i))}
 
-// =======================
-// Password Toggle
-// =======================
+// Password toggle
 function togglePassword(){password.style.display=visibility.value==='private'?'block':'none';if(visibility.value!=='private')password.value=''}
 
-// =======================
-// ID Generator
-// =======================
+// ID generator
 function genID(){return Math.random().toString(36).slice(2,7)}
 
-// =======================
-// Fetch Notes from Supabase
-// =======================
+// Fetch notes
 async function fetchNotes(){
   const { data,error } = await supabase.from(tableName).select('*').order('created_at',{ascending:false})
   if(error) console.error(error)
-  else notes = data
+  else notes=data
   render()
 }
 
-// =======================
-// Publish Note
-// =======================
+// Publish note
 async function publish(){
-  if(html.style.display==='block') editor.innerHTML=html.value
+  if(html.style.display==='block')editor.innerHTML=html.value
   const id=genID()
   const noteData={
     id,
@@ -205,66 +146,39 @@ async function publish(){
     visibility:visibility.value,
     password:password.value||''
   }
-  // Insert into Supabase
-  const { data,error } = await supabase.from(tableName).insert([noteData])
-  if(error) return alert('Gagal publish: '+error.message)
+  const {data,error}=await supabase.from(tableName).insert([noteData])
+  if(error) return alert('Publish gagal: '+error.message)
   tempLink=`https://narapoi.pages.dev/v/view.html?id=${id}`
   fetchNotes()
 }
 
-// =======================
-// History / Actions
-// =======================
-async function deleteNote(id){
-  if(!confirm('Yakin hapus note ini?')) return
-  const { error } = await supabase.from(tableName).delete().eq('id',id)
-  if(error) return alert('Gagal hapus: '+error.message)
-  tempLink=null
-  fetchNotes()
-}
+// Delete / Edit
+async function deleteNote(id){if(!confirm('Yakin hapus note ini?'))return; const {error}=await supabase.from(tableName).delete().eq('id',id);if(error)return alert(error.message); tempLink=null;fetchNotes()}
+async function loadEdit(id){const note=notes.find(n=>n.id===id);if(!note)return;title.value=note.title;editor.innerHTML=note.content;visibility.value=note.visibility;password.value=note.password||'';togglePassword();tempLink=null;render()}
 
-async function loadEdit(id){
-  const note = notes.find(n=>n.id===id)
-  if(!note) return
-  title.value=note.title
-  editor.innerHTML=note.content
-  visibility.value=note.visibility
-  password.value=note.password||''
-  togglePassword()
-  tempLink=null
-  render()
-}
-
-// =======================
-// Render Notes / History
-// =======================
+// Render
 function render(){
   links.innerHTML=''
   historyBox.innerHTML=''
-  if(tempLink){
-    links.innerHTML=`<div class="card"><span>${tempLink}</span><button onclick="navigator.clipboard.writeText('${tempLink}')">Salin</button></div>`
-  }
+  if(tempLink) links.innerHTML=`<div class="card"><span>${tempLink}</span><button onclick="navigator.clipboard.writeText('${tempLink}')">Salin</button></div>`
   notes.forEach(n=>{
     historyBox.innerHTML+=`
-      <div class="card">
-        <div>
-          <b>${n.title}</b><br><small>${new Date(n.created_at||Date.now()).toLocaleString()}</small>
-        </div>
-        <div class="actions">
-          <button onclick="window.open('https://narapoi.pages.dev/v/view.html?id=${n.id}')">Lihat</button>
-          <button onclick="loadEdit('${n.id}')">Edit</button>
-          <button class="danger" onclick="deleteNote('${n.id}')">Hapus</button>
-        </div>
-      </div>`
+    <div class="card">
+      <div>
+        <b>${n.title}</b><br><small>${new Date(n.created_at||Date.now()).toLocaleString()}</small>
+      </div>
+      <div class="actions">
+        <button onclick="window.open('https://narapoi.pages.dev/v/view.html?id=${n.id}')">Lihat</button>
+        <button onclick="loadEdit('${n.id}')">Edit</button>
+        <button class="danger" onclick="deleteNote('${n.id}')">Hapus</button>
+      </div>
+    </div>`
   })
 }
 
-// =======================
 // Init
-// =======================
 togglePassword()
 fetchNotes()
 </script>
-
 </body>
 </html>
