@@ -100,9 +100,16 @@ async function load(){
 
 /* ========= SHOW CONTENT ========= */
 function show(){
-  content.innerHTML = note.content;
+  let html = note.content;
+
+  // auto linkify (ubah URL polos jadi <a>)
+  html = html.replace(
+    /(https?:\/\/[^\s<]+)/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
+
+  content.innerHTML = html;
   content.style.display = 'block';
-  enableLinks();
 }
 
 /* ========= ENABLE LINK ========= */
