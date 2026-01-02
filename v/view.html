@@ -13,8 +13,9 @@ body{margin:0;background:#f3f4f6;font-family:system-ui}
 .header h2{margin:0;font-size:20px}
 .meta{display:flex;gap:16px;font-size:13px;color:#555;margin-top:6px}
 .meta span{display:flex;align-items:center;gap:6px}
-.content{padding:14px;line-height:1.6}
+.content{padding:14px;line-height:1.6;word-break:break-word}
 .content img{max-width:100%;border-radius:6px}
+.content a{color:#2563eb;text-decoration:underline}
 .lock{padding:16px}
 .lock input,.lock button{width:100%;padding:10px;margin-top:8px;border-radius:8px}
 .lock button{background:#dc2626;color:#fff;border:none}
@@ -60,14 +61,8 @@ const sb = createClient(
 
 /* ========= VAR ========= */
 const id = new URLSearchParams(location.search).get('id');
-const session =
-  localStorage.getItem('note_session') ||
-  (() => {
-    const s = crypto.randomUUID();
-    localStorage.setItem('note_session', s);
-    return s;
-  })();
-
+const session = localStorage.getItem('session_id') || crypto.randomUUID();
+localStorage.setItem('session_id', session);
 let note;
 
 /* ========= LOAD ========= */
@@ -103,9 +98,19 @@ async function load(){
   realtime();
 }
 
+/* ========= SHOW CONTENT ========= */
 function show(){
   content.innerHTML = note.content;
   content.style.display = 'block';
+  enableLinks();
+}
+
+/* ========= ENABLE LINK ========= */
+function enableLinks(){
+  content.querySelectorAll('a').forEach(a=>{
+    a.setAttribute('target','_blank');
+    a.setAttribute('rel','noopener noreferrer');
+  });
 }
 
 /* ========= PASSWORD ========= */
@@ -120,42 +125,41 @@ function unlock(){
 
 /* ========= VIEWS ========= */
 async function addView(){
-  await sb.from('views').insert({ note_id: id });
+  await sb.from('views').insert({ note_id:id });
 }
 
 async function countViews(){
   const { count } = await sb
     .from('views')
-    .select('*', { count:'exact', head:true })
-    .eq('note_id', id);
+    .select('*',{count:'exact',head:true})
+    .eq('note_id',id);
 
   views.textContent = count || 0;
 }
 
-/* ========= ONLINE (FIX TOTAL) ========= */
+/* ========= ONLINE ========= */
 async function joinOnline(){
-  await sb.from('online_users').upsert({
-    note_id: id,
-    session_id: session,
-    last_seen: new Date().toISOString()
-  },{
-    onConflict: 'note_id,session_id'
-  });
+  await sb.from('online_users')
+    .upsert({
+      note_id:id,
+      session_id:session,
+      last_seen:new Date().toISOString()
+    });
 
   setInterval(()=>{
     sb.from('online_users')
-      .update({ last_seen: new Date().toISOString() })
-      .eq('note_id', id)
-      .eq('session_id', session);
-  }, 15000);
+      .update({ last_seen:new Date().toISOString() })
+      .eq('note_id',id)
+      .eq('session_id',session);
+  },15000);
 }
 
 async function countOnline(){
   const { count } = await sb
     .from('online_users')
-    .select('*', { count:'exact', head:true })
-    .eq('note_id', id)
-    .gte('last_seen', new Date(Date.now()-30000).toISOString());
+    .select('*',{count:'exact',head:true})
+    .eq('note_id',id)
+    .gte('last_seen',new Date(Date.now()-30000).toISOString());
 
   online.textContent = count || 0;
 }
@@ -163,9 +167,8 @@ async function countOnline(){
 /* ========= REALTIME ========= */
 function realtime(){
   sb.channel('note-'+id)
-    .on('postgres_changes',{event:'INSERT',table:'online_users'},countOnline)
-    .on('postgres_changes',{event:'UPDATE',table:'online_users'},countOnline)
-    .on('postgres_changes',{event:'INSERT',table:'views'},countViews)
+    .on('postgres_changes',{event:'INSERT',table:'views',filter:`note_id=eq.${id}`},countViews)
+    .on('postgres_changes',{event:'UPDATE',table:'online_users',filter:`note_id=eq.${id}`},countOnline)
     .subscribe();
 }
 
@@ -176,7 +179,7 @@ function refresh(){
 
 /* ========= UTILS ========= */
 function copy(){ navigator.clipboard.writeText(location.href); }
-function share(){ navigator.share?.({ title: note.title, url: location.href }); }
+function share(){ navigator.share?.({ title:note.title, url:location.href }); }
 
 load();
 </script>
