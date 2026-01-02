@@ -51,26 +51,26 @@ body{margin:0;background:#f3f4f6;font-family:system-ui}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-/* ===== SUPABASE ===== */
+/* ========= SUPABASE ========= */
 const { createClient } = supabase;
 const sb = createClient(
   "https://reglvenhbvmyqujoydil.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2x2ZW5oYnZteXF1am95ZGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyMzc2MDQsImV4cCI6MjA4MjgxMzYwNH0.h-UEIR98TT8TynjraSQi7iwUrnCQ0nLuFJKaHPbOSUc"
 );
 
-/* ===== VAR ===== */
+/* ========= VAR ========= */
 const id = new URLSearchParams(location.search).get('id');
-
-/* === SESSION FIX (INI PENTING) === */
-let session = localStorage.getItem('online_session');
-if(!session){
-  session = crypto.randomUUID();
-  localStorage.setItem('online_session', session);
-}
+const session =
+  localStorage.getItem('note_session') ||
+  (() => {
+    const s = crypto.randomUUID();
+    localStorage.setItem('note_session', s);
+    return s;
+  })();
 
 let note;
 
-/* ===== LOAD NOTE ===== */
+/* ========= LOAD ========= */
 async function load(){
   if(!id){
     document.body.innerHTML = 'NOT FOUND';
@@ -108,7 +108,7 @@ function show(){
   content.style.display = 'block';
 }
 
-/* ===== PASSWORD ===== */
+/* ========= PASSWORD ========= */
 function unlock(){
   if(pass.value === note.password){
     lock.style.display = 'none';
@@ -118,7 +118,7 @@ function unlock(){
   }
 }
 
-/* ===== VIEWS (AMAN) ===== */
+/* ========= VIEWS ========= */
 async function addView(){
   await sb.from('views').insert({ note_id: id });
 }
@@ -132,17 +132,20 @@ async function countViews(){
   views.textContent = count || 0;
 }
 
-/* ===== ONLINE (FIXED) ===== */
+/* ========= ONLINE (FIX TOTAL) ========= */
 async function joinOnline(){
   await sb.from('online_users').upsert({
     note_id: id,
     session_id: session,
     last_seen: new Date().toISOString()
+  },{
+    onConflict: 'note_id,session_id'
   });
 
   setInterval(()=>{
     sb.from('online_users')
       .update({ last_seen: new Date().toISOString() })
+      .eq('note_id', id)
       .eq('session_id', session);
   }, 15000);
 }
@@ -157,12 +160,12 @@ async function countOnline(){
   online.textContent = count || 0;
 }
 
-/* ===== REALTIME ===== */
+/* ========= REALTIME ========= */
 function realtime(){
   sb.channel('note-'+id)
-    .on('postgres_changes',{event:'INSERT',table:'views',filter:`note_id=eq.${id}`},countViews)
-    .on('postgres_changes',{event:'INSERT',table:'online_users',filter:`note_id=eq.${id}`},countOnline)
-    .on('postgres_changes',{event:'UPDATE',table:'online_users',filter:`note_id=eq.${id}`},countOnline)
+    .on('postgres_changes',{event:'INSERT',table:'online_users'},countOnline)
+    .on('postgres_changes',{event:'UPDATE',table:'online_users'},countOnline)
+    .on('postgres_changes',{event:'INSERT',table:'views'},countViews)
     .subscribe();
 }
 
@@ -171,7 +174,7 @@ function refresh(){
   countOnline();
 }
 
-/* ===== UTILS ===== */
+/* ========= UTILS ========= */
 function copy(){ navigator.clipboard.writeText(location.href); }
 function share(){ navigator.share?.({ title: note.title, url: location.href }); }
 
