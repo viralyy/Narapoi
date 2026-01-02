@@ -44,29 +44,29 @@ body{margin:0;background:#f3f4f6;font-family:system-ui}
   <div id="content" class="content" style="display:none"></div>
 
   <div class="actions">
-    <button onclick="copyLink()">Salin Link</button>
-    <button onclick="shareLink()">Share</button>
+    <button onclick="copy()">Salin Link</button>
+    <button onclick="share()">Share</button>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-/* ===== SUPABASE ===== */
+/* ========= SUPABASE CLIENT (INI YG KEMAREN SALAH) ========= */
 const { createClient } = supabase;
 const sb = createClient(
   "https://reglvenhbvmyqujoydil.supabase.co",
-  "PASTE_ANON_KEY_LU_DI_SINI"
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2x2ZW5oYnZteXF1am95ZGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyMzc2MDQsImV4cCI6MjA4MjgxMzYwNH0.h-UEIR98TT8TynjraSQi7iwUrnCQ0nLuFJKaHPbOSUc"
 );
 
-/* ===== VAR ===== */
+/* ========= VAR ========= */
 const id = new URLSearchParams(location.search).get('id');
 const session = crypto.randomUUID();
 let note;
 
-/* ===== LOAD NOTE ===== */
+/* ========= LOAD NOTE ========= */
 async function load(){
   if(!id){
-    document.body.innerHTML = 'INVALID ID';
+    document.body.innerHTML = 'NOT FOUND';
     return;
   }
 
@@ -87,33 +87,31 @@ async function load(){
   if(note.visibility === 'private'){
     lock.style.display = 'block';
   }else{
-    showContent();
+    show();
   }
 
-  await addView();
-  await joinOnline();
-
-  refreshCount();
+  addView();
+  joinOnline();
+  refresh();
   realtime();
 }
 
-/* ===== SHOW ===== */
-function showContent(){
+function show(){
   content.innerHTML = note.content;
   content.style.display = 'block';
 }
 
-/* ===== PASSWORD ===== */
+/* ========= PASSWORD ========= */
 function unlock(){
   if(pass.value === note.password){
     lock.style.display = 'none';
-    showContent();
+    show();
   }else{
     err.textContent = 'Password salah';
   }
 }
 
-/* ===== VIEWS ===== */
+/* ========= VIEWS ========= */
 async function addView(){
   await sb.from('views').insert({ note_id: id });
 }
@@ -127,7 +125,7 @@ async function countViews(){
   views.textContent = count || 0;
 }
 
-/* ===== ONLINE ===== */
+/* ========= ONLINE ========= */
 async function joinOnline(){
   await sb.from('online_users').insert({
     note_id: id,
@@ -135,7 +133,7 @@ async function joinOnline(){
     last_seen: new Date().toISOString()
   });
 
-  setInterval(() => {
+  setInterval(()=>{
     sb.from('online_users')
       .update({ last_seen: new Date().toISOString() })
       .eq('session_id', session);
@@ -147,49 +145,28 @@ async function countOnline(){
     .from('online_users')
     .select('*', { count:'exact', head:true })
     .eq('note_id', id)
-    .gte('last_seen', new Date(Date.now() - 30000).toISOString());
+    .gte('last_seen', new Date(Date.now()-30000).toISOString());
 
   online.textContent = count || 0;
 }
 
-/* ===== REALTIME ===== */
+/* ========= REALTIME ========= */
 function realtime(){
-  sb.channel('note-' + id)
-    .on('postgres_changes', {
-      event: 'INSERT',
-      table: 'views',
-      filter: `note_id=eq.${id}`
-    }, countViews)
-    .on('postgres_changes', {
-      event: 'INSERT',
-      table: 'online_users',
-      filter: `note_id=eq.${id}`
-    }, countOnline)
-    .on('postgres_changes', {
-      event: 'UPDATE',
-      table: 'online_users',
-      filter: `note_id=eq.${id}`
-    }, countOnline)
+  sb.channel('note-'+id)
+    .on('postgres_changes',{event:'INSERT',table:'views',filter:`note_id=eq.${id}`},countViews)
+    .on('postgres_changes',{event:'INSERT',table:'online_users',filter:`note_id=eq.${id}`},countOnline)
+    .on('postgres_changes',{event:'UPDATE',table:'online_users',filter:`note_id=eq.${id}`},countOnline)
     .subscribe();
 }
 
-/* ===== INIT ===== */
-function refreshCount(){
+function refresh(){
   countViews();
   countOnline();
 }
 
-/* ===== UTILS ===== */
-function copyLink(){
-  navigator.clipboard.writeText(location.href);
-}
-
-function shareLink(){
-  navigator.share?.({
-    title: note.title,
-    url: location.href
-  });
-}
+/* ========= UTILS ========= */
+function copy(){ navigator.clipboard.writeText(location.href); }
+function share(){ navigator.share?.({ title: note.title, url: location.href }); }
 
 load();
 </script>
