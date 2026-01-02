@@ -6,16 +6,17 @@
 <title>View Note</title>
 
 <style>
+*{box-sizing:border-box}
 body{
   margin:0;
   background:#f3f4f6;
-  font-family:system-ui,Arial;
+  font-family:system-ui;
 }
 .wrap{
   max-width:720px;
   margin:14px auto;
   background:#fff;
-  border-radius:10px;
+  border-radius:12px;
   box-shadow:0 2px 10px rgba(0,0,0,.1);
   overflow:hidden;
 }
@@ -23,169 +24,204 @@ body{
   padding:14px;
   border-bottom:1px solid #e5e7eb;
 }
-.header h1{
-  margin:0 0 6px;
-  font-size:20px;
-}
+.header h2{margin:0;font-size:20px}
 .meta{
   display:flex;
-  gap:14px;
+  gap:16px;
   font-size:13px;
   color:#555;
-  flex-wrap:wrap;
+  margin-top:6px;
+}
+.meta span{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.meta svg{
+  width:16px;
+  height:16px;
+  stroke:#111;
 }
 .content{
   padding:14px;
+  line-height:1.6;
 }
 .content img{
   max-width:100%;
-  height:auto;
-  display:block;
-  margin:10px auto;
-  border-radius:8px;
+  border-radius:6px;
 }
 .lock{
-  padding:20px;
-  text-align:center;
+  padding:16px;
 }
-.lock input{
+.lock input,.lock button{
   width:100%;
   padding:10px;
+  margin-top:8px;
   border-radius:8px;
-  border:1px solid #ccc;
-  margin-top:10px;
 }
 .lock button{
-  margin-top:10px;
-  padding:10px;
-  width:100%;
-  border-radius:8px;
-  border:none;
   background:#dc2626;
   color:#fff;
-  font-weight:600;
+  border:none;
 }
-.share{
+.actions{
   display:flex;
   gap:8px;
   padding:12px;
   border-top:1px solid #e5e7eb;
-  flex-wrap:wrap;
 }
-.share button{
+.actions button{
   flex:1;
   padding:10px;
   border-radius:8px;
   border:1px solid #ccc;
-  background:#f9fafb;
   font-weight:600;
+  background:#f9fafb;
 }
 </style>
 </head>
+
 <body>
 
-<div class="wrap" id="app" style="display:none">
+<div class="wrap">
   <div class="header">
-    <h1 id="title"></h1>
+    <h2 id="title">Loading...</h2>
     <div class="meta">
-      <span id="time"></span>
-      <span>Views: <b id="views">0</b></span>
-      <span>Online: <b id="online">0</b></span>
+      <span>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+        <b id="views">0</b> views
+      </span>
+
+      <span>
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+          <circle cx="12" cy="7" r="4"/>
+          <path d="M5.5 21a6.5 6.5 0 0 1 13 0"/>
+        </svg>
+        <b id="online">0</b> online
+      </span>
     </div>
   </div>
 
-  <div class="content" id="content"></div>
+  <div id="lock" class="lock" style="display:none">
+    <b>Note Private</b>
+    <input id="pass" placeholder="Password">
+    <button onclick="unlock()">Buka</button>
+    <small id="err" style="color:red"></small>
+  </div>
 
-  <div class="share">
-    <button onclick="shareWA()">WhatsApp</button>
-    <button onclick="shareTG()">Telegram</button>
-    <button onclick="shareFB()">Facebook</button>
-    <button onclick="copyLink()">Salin Link</button>
+  <div id="content" class="content" style="display:none"></div>
+
+  <div class="actions">
+    <button onclick="copy()">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2"/>
+        <rect x="2" y="2" width="13" height="13" rx="2"/>
+      </svg>
+      Salin Link
+    </button>
+
+    <button onclick="share()">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke-width="2">
+        <circle cx="18" cy="5" r="3"/>
+        <circle cx="6" cy="12" r="3"/>
+        <circle cx="18" cy="19" r="3"/>
+        <line x1="8.5" y1="13.5" x2="15.5" y2="17.5"/>
+        <line x1="15.5" y1="6.5" x2="8.5" y2="10.5"/>
+      </svg>
+      Share
+    </button>
   </div>
 </div>
 
-<div class="wrap lock" id="lock" style="display:none">
-  <h3>Note Terkunci</h3>
-  <input type="password" id="pass" placeholder="Masukkan password">
-  <button onclick="unlock()">Buka Note</button>
-</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabase = supabaseJs.createClient(
+ "https://reglvenhbvmyqujoydil.supabase.co",
+ "PASTE_ANON_KEY_LU"
+);
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, get, set, onValue, onDisconnect, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const id=new URLSearchParams(location.search).get('id');
+const session=crypto.randomUUID();
+let note;
 
-const firebaseConfig = {
-  apiKey: "AIzaSyC4KJsPLfoEiZSKQUZHrGzZh6-Fv_0Q7P0",
-  authDomain: "views-counter-610fa.firebaseapp.com",
-  databaseURL: "https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "views-counter-610fa",
-  storageBucket: "views-counter-610fa.firebasestorage.app",
-  messagingSenderId: "998762153750",
-  appId: "1:998762153750:web:7113cd0bba422204fa7237"
-};
+async function load(){
+  const {data}=await supabase.from('notes').select('*').eq('id',id).single();
+  if(!data){document.body.innerHTML='NOT FOUND';return}
+  note=data;
+  title.textContent=data.title;
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+  if(data.visibility==='private'){
+    lock.style.display='block';
+  }else show();
 
-const id = new URLSearchParams(location.search).get('id');
-const notes = JSON.parse(localStorage.getItem('notes') || '[]');
-const note = notes.find(n=>n.id===id);
-
-if(!note){
-  document.body.innerHTML='<h2 style="text-align:center">Note tidak ditemukan</h2>';
-  throw '';
+  addView();
+  onlineJoin();
+  countViews();
+  countOnline();
+  realtime();
 }
 
-title.textContent = note.title;
-time.textContent = note.time;
-content.innerHTML = note.content;
-
-if(note.visibility === 'private'){
-  appBox(false);
-}else{
-  appBox(true);
+function show(){
+  content.innerHTML=note.content;
+  content.style.display='block';
 }
 
-function appBox(show){
-  document.getElementById('app').style.display = show?'block':'none';
-  document.getElementById('lock').style.display = show?'none':'block';
+function unlock(){
+  if(pass.value===note.password){
+    lock.style.display='none';
+    show();
+  }else err.textContent='Password salah';
 }
 
-window.unlock = ()=>{
-  if(pass.value === note.password){
-    appBox(true);
-    initFirebase();
-  }else{
-    alert('Password salah');
-  }
-};
+async function addView(){
+  await supabase.from('views').insert({note_id:id});
+}
 
-function initFirebase(){
-  const viewRef = ref(db, `views/${id}`);
-  set(viewRef, increment(1));
+async function countViews(){
+  const {count}=await supabase
+    .from('views')
+    .select('*',{count:'exact',head:true})
+    .eq('note_id',id);
+  views.textContent=count;
+}
 
-  onValue(viewRef, s=>{
-    views.textContent = s.val() || 0;
+async function onlineJoin(){
+  await supabase.from('online_users').insert({
+    note_id:id,
+    session_id:session
   });
 
-  const userId = Math.random().toString(36).slice(2);
-  const onlineRef = ref(db, `online/${id}/${userId}`);
-  set(onlineRef, true);
-  onDisconnect(onlineRef).remove();
-
-  onValue(ref(db, `online/${id}`), s=>{
-    online.textContent = s.exists() ? Object.keys(s.val()).length : 0;
-  });
+  setInterval(()=>{
+    supabase.from('online_users')
+      .update({last_seen:new Date()})
+      .eq('session_id',session);
+  },15000);
 }
 
-if(note.visibility === 'public'){
-  initFirebase();
+async function countOnline(){
+  const {count}=await supabase
+    .from('online_users')
+    .select('*',{count:'exact',head:true})
+    .eq('note_id',id)
+    .gte('last_seen',new Date(Date.now()-30000).toISOString());
+  online.textContent=count;
 }
 
-window.shareWA=()=>window.open(`https://wa.me/?text=${encodeURIComponent(location.href)}`);
-window.shareTG=()=>window.open(`https://t.me/share/url?url=${encodeURIComponent(location.href)}`);
-window.shareFB=()=>window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href)}`);
-window.copyLink=()=>navigator.clipboard.writeText(location.href);
+function realtime(){
+  supabase.channel('realtime')
+    .on('postgres_changes',{event:'INSERT',table:'views'},countViews)
+    .on('postgres_changes',{event:'INSERT',table:'online_users'},countOnline)
+    .on('postgres_changes',{event:'UPDATE',table:'online_users'},countOnline)
+    .subscribe();
+}
+
+function copy(){navigator.clipboard.writeText(location.href)}
+function share(){navigator.share?.({title:note.title,url:location.href})}
+
+load();
 </script>
 
 </body>
