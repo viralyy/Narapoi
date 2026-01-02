@@ -50,7 +50,6 @@ textarea{display:none;resize:vertical}
 .card span{font-size:13px;word-break:break-all}
 .actions{display:flex;gap:6px;flex-wrap:wrap}
 .card button{padding:6px 10px;border-radius:6px;border:1px solid #ccc;background:#f9fafb;font-weight:600;cursor:pointer}
-.card button.danger{background:#fee2e2;border-color:#fecaca;color:#991b1b}
 small{color:#666}
 </style>
 </head>
@@ -108,7 +107,7 @@ small{color:#666}
       <option value="private">Private</option>
     </select>
     <input id="password" placeholder="Password (private)" style="display:none">
-    <button class="publish" id="publishBtn">Publish</button>
+    <button class="publish" id="publishBtn" type="button">Publish</button>
   </div>
 </div>
 
@@ -124,10 +123,11 @@ small{color:#666}
 
 <input type="file" id="imgPick" accept="image/*" hidden>
 
-<!-- SUPABASE -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- SUPABASE v2 (FIX) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-const supabase = supabase.createClient(
+const { createClient } = supabase;
+const sb = createClient(
   "https://reglvenhbvmyqujoydil.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2x2ZW5oYnZteXF1am95ZGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyMzc2MDQsImV4cCI6MjA4MjgxMzYwNH0.h-UEIR98TT8TynjraSQi7iwUrnCQ0nLuFJKaHPbOSUc"
 );
@@ -190,9 +190,9 @@ visibility.onchange=()=>{
 };
 
 document.getElementById('publishBtn').onclick=async()=>{
-  if(html.style.display==='block')editor.innerHTML=html.value;
+  if(html.style.display==='block') editor.innerHTML=html.value;
 
-  const data={
+  const payload={
     id:genID(),
     title:title.value||'Untitled',
     content:editor.innerHTML,
@@ -200,20 +200,21 @@ document.getElementById('publishBtn').onclick=async()=>{
     password:password.value||null
   };
 
-  const {error}=await supabase.from('notes').insert([data]);
-  if(error){alert('Publish gagal');return;}
+  const { error } = await sb.from('notes').insert([payload]);
+  if(error){ alert(error.message); return; }
 
   links.innerHTML=`
     <div class="card">
-      <span>https://narapoi.pages.dev/v/view.html?id=${data.id}</span>
-      <button onclick="navigator.clipboard.writeText('https://narapoi.pages.dev/v/view.html?id=${data.id}')">Salin</button>
+      <span>https://narapoi.pages.dev/v/view.html?id=${payload.id}</span>
+      <button onclick="navigator.clipboard.writeText('https://narapoi.pages.dev/v/view.html?id=${payload.id}')">Salin</button>
     </div>`;
   loadHistory();
 };
 
 async function loadHistory(){
-  const {data}=await supabase.from('notes').select('*').order('created_at',{ascending:false});
+  const { data } = await sb.from('notes').select('*').order('created_at',{ascending:false});
   historyBox.innerHTML='';
+  if(!data) return;
   data.forEach(n=>{
     historyBox.innerHTML+=`
       <div class="card">
