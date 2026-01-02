@@ -44,29 +44,36 @@ body{margin:0;background:#f3f4f6;font-family:system-ui}
   <div id="content" class="content" style="display:none"></div>
 
   <div class="actions">
-    <button onclick="copy()">Salin Link</button>
-    <button onclick="share()">Share</button>
+    <button onclick="copyLink()">Salin Link</button>
+    <button onclick="shareLink()">Share</button>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+/* ===== SUPABASE ===== */
 const { createClient } = supabase;
 const sb = createClient(
   "https://reglvenhbvmyqujoydil.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2x2ZW5oYnZteXF1am95ZGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyMzc2MDQsImV4cCI6MjA4MjgxMzYwNH0.h-UEIR98TT8TynjraSQi7iwUrnCQ0nLuFJKaHPbOSUc"
+  "PASTE_ANON_KEY_LU_DI_SINI"
 );
 
+/* ===== VAR ===== */
 const id = new URLSearchParams(location.search).get('id');
 const session = crypto.randomUUID();
 let note;
 
 /* ===== LOAD NOTE ===== */
 async function load(){
-  const {data,error} = await supabase
+  if(!id){
+    document.body.innerHTML = 'INVALID ID';
+    return;
+  }
+
+  const { data, error } = await sb
     .from('notes')
     .select('*')
-    .eq('id',id)
+    .eq('id', id)
     .maybeSingle();
 
   if(error || !data){
@@ -80,16 +87,18 @@ async function load(){
   if(note.visibility === 'private'){
     lock.style.display = 'block';
   }else{
-    show();
+    showContent();
   }
 
-  addView();
-  joinOnline();
-  refresh();
+  await addView();
+  await joinOnline();
+
+  refreshCount();
   realtime();
 }
 
-function show(){
+/* ===== SHOW ===== */
+function showContent(){
   content.innerHTML = note.content;
   content.style.display = 'block';
 }
@@ -98,7 +107,7 @@ function show(){
 function unlock(){
   if(pass.value === note.password){
     lock.style.display = 'none';
-    show();
+    showContent();
   }else{
     err.textContent = 'Password salah';
   }
@@ -106,60 +115,81 @@ function unlock(){
 
 /* ===== VIEWS ===== */
 async function addView(){
-  await supabase.from('views').insert({ note_id:id });
+  await sb.from('views').insert({ note_id: id });
 }
 
 async function countViews(){
-  const {count} = await supabase
+  const { count } = await sb
     .from('views')
-    .select('*',{count:'exact',head:true})
-    .eq('note_id',id);
+    .select('*', { count:'exact', head:true })
+    .eq('note_id', id);
 
   views.textContent = count || 0;
 }
 
 /* ===== ONLINE ===== */
 async function joinOnline(){
-  await supabase.from('online_users').insert({
-    note_id:id,
-    session_id:session,
-    last_seen:new Date().toISOString()
+  await sb.from('online_users').insert({
+    note_id: id,
+    session_id: session,
+    last_seen: new Date().toISOString()
   });
 
-  setInterval(()=>{
-    supabase.from('online_users')
-      .update({last_seen:new Date().toISOString()})
-      .eq('session_id',session);
-  },15000);
+  setInterval(() => {
+    sb.from('online_users')
+      .update({ last_seen: new Date().toISOString() })
+      .eq('session_id', session);
+  }, 15000);
 }
 
 async function countOnline(){
-  const {count} = await supabase
+  const { count } = await sb
     .from('online_users')
-    .select('*',{count:'exact',head:true})
-    .eq('note_id',id)
-    .gte('last_seen', new Date(Date.now()-30000).toISOString());
+    .select('*', { count:'exact', head:true })
+    .eq('note_id', id)
+    .gte('last_seen', new Date(Date.now() - 30000).toISOString());
 
   online.textContent = count || 0;
 }
 
 /* ===== REALTIME ===== */
 function realtime(){
-  supabase.channel('note-'+id)
-    .on('postgres_changes',{event:'INSERT',table:'views',filter:`note_id=eq.${id}`},countViews)
-    .on('postgres_changes',{event:'INSERT',table:'online_users',filter:`note_id=eq.${id}`},countOnline)
-    .on('postgres_changes',{event:'UPDATE',table:'online_users',filter:`note_id=eq.${id}`},countOnline)
+  sb.channel('note-' + id)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      table: 'views',
+      filter: `note_id=eq.${id}`
+    }, countViews)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      table: 'online_users',
+      filter: `note_id=eq.${id}`
+    }, countOnline)
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      table: 'online_users',
+      filter: `note_id=eq.${id}`
+    }, countOnline)
     .subscribe();
 }
 
-function refresh(){
+/* ===== INIT ===== */
+function refreshCount(){
   countViews();
   countOnline();
 }
 
 /* ===== UTILS ===== */
-function copy(){navigator.clipboard.writeText(location.href)}
-function share(){navigator.share?.({title:note.title,url:location.href})}
+function copyLink(){
+  navigator.clipboard.writeText(location.href);
+}
+
+function shareLink(){
+  navigator.share?.({
+    title: note.title,
+    url: location.href
+  });
+}
 
 load();
 </script>
