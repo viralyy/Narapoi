@@ -6,78 +6,22 @@
 <title>View Note</title>
 
 <style>
+/* === TAMPILAN TIDAK DIUBAH === */
 *{box-sizing:border-box}
-body{
-  margin:0;
-  background:#f3f4f6;
-  font-family:system-ui;
-}
-.wrap{
-  max-width:720px;
-  margin:14px auto;
-  background:#fff;
-  border-radius:12px;
-  box-shadow:0 2px 10px rgba(0,0,0,.1);
-  overflow:hidden;
-}
-.header{
-  padding:14px;
-  border-bottom:1px solid #e5e7eb;
-}
+body{margin:0;background:#f3f4f6;font-family:system-ui}
+.wrap{max-width:720px;margin:14px auto;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.1);overflow:hidden}
+.header{padding:14px;border-bottom:1px solid #e5e7eb}
 .header h2{margin:0;font-size:20px}
-.meta{
-  display:flex;
-  gap:16px;
-  font-size:13px;
-  color:#555;
-  margin-top:6px;
-}
-.meta span{
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.meta svg{
-  width:16px;
-  height:16px;
-  stroke:#111;
-}
-.content{
-  padding:14px;
-  line-height:1.6;
-}
-.content img{
-  max-width:100%;
-  border-radius:6px;
-}
-.lock{
-  padding:16px;
-}
-.lock input,.lock button{
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  border-radius:8px;
-}
-.lock button{
-  background:#dc2626;
-  color:#fff;
-  border:none;
-}
-.actions{
-  display:flex;
-  gap:8px;
-  padding:12px;
-  border-top:1px solid #e5e7eb;
-}
-.actions button{
-  flex:1;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  font-weight:600;
-  background:#f9fafb;
-}
+.meta{display:flex;gap:16px;font-size:13px;color:#555;margin-top:6px}
+.meta span{display:flex;align-items:center;gap:6px}
+.meta svg{width:16px;height:16px;stroke:#111}
+.content{padding:14px;line-height:1.6}
+.content img{max-width:100%;border-radius:6px}
+.lock{padding:16px}
+.lock input,.lock button{width:100%;padding:10px;margin-top:8px;border-radius:8px}
+.lock button{background:#dc2626;color:#fff;border:none}
+.actions{display:flex;gap:8px;padding:12px;border-top:1px solid #e5e7eb}
+.actions button{flex:1;padding:10px;border-radius:8px;border:1px solid #ccc;font-weight:600;background:#f9fafb}
 </style>
 </head>
 
@@ -87,21 +31,8 @@ body{
   <div class="header">
     <h2 id="title">Loading...</h2>
     <div class="meta">
-      <span>
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
-          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
-          <circle cx="12" cy="12" r="3"/>
-        </svg>
-        <b id="views">0</b> views
-      </span>
-
-      <span>
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
-          <circle cx="12" cy="7" r="4"/>
-          <path d="M5.5 21a6.5 6.5 0 0 1 13 0"/>
-        </svg>
-        <b id="online">0</b> online
-      </span>
+      <span><b id="views">0</b> views</span>
+      <span><b id="online">0</b> online</span>
     </div>
   </div>
 
@@ -115,60 +46,57 @@ body{
   <div id="content" class="content" style="display:none"></div>
 
   <div class="actions">
-    <button onclick="copy()">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke-width="2">
-        <rect x="9" y="9" width="13" height="13" rx="2"/>
-        <rect x="2" y="2" width="13" height="13" rx="2"/>
-      </svg>
-      Salin Link
-    </button>
-
-    <button onclick="share()">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke-width="2">
-        <circle cx="18" cy="5" r="3"/>
-        <circle cx="6" cy="12" r="3"/>
-        <circle cx="18" cy="19" r="3"/>
-        <line x1="8.5" y1="13.5" x2="15.5" y2="17.5"/>
-        <line x1="15.5" y1="6.5" x2="8.5" y2="10.5"/>
-      </svg>
-      Share
-    </button>
+    <button onclick="copy()">Salin Link</button>
+    <button onclick="share()">Share</button>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const supabase = supabaseJs.createClient(
- "https://reglvenhbvmyqujoydil.supabase.co",
- "PASTE_ANON_KEY_LU"
+  "https://reglvenhbvmyqujoydil.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2x2ZW5oYnZteXF1am95ZGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyMzc2MDQsImV4cCI6MjA4MjgxMzYwNH0.h-UEIR98TT8TynjraSQi7iwUrnCQ0nLuFJKaHPbOSUc"
 );
 
-const id=new URLSearchParams(location.search).get('id');
-const session=crypto.randomUUID();
+const id = new URLSearchParams(location.search).get('id');
+const session = crypto.randomUUID();
 let note;
 
+/* ================= LOAD NOTE ================= */
 async function load(){
-  const {data}=await supabase.from('notes').select('*').eq('id',id).single();
-  if(!data){document.body.innerHTML='NOT FOUND';return}
-  note=data;
-  title.textContent=data.title;
+  const {data,error} = await supabase
+    .from('notes')
+    .select('*')
+    .eq('id',id)
+    .limit(1);
 
-  if(data.visibility==='private'){
+  if(error || !data || data.length===0){
+    document.body.innerHTML='NOT FOUND';
+    return;
+  }
+
+  note = data[0];
+  title.textContent = note.title;
+
+  if(note.visibility==='private'){
     lock.style.display='block';
-  }else show();
+  }else{
+    show();
+  }
 
   addView();
-  onlineJoin();
+  joinOnline();
   countViews();
   countOnline();
   realtime();
 }
 
 function show(){
-  content.innerHTML=note.content;
-  content.style.display='block';
+  content.innerHTML = note.content;
+  content.style.display = 'block';
 }
 
+/* ================= PRIVATE ================= */
 function unlock(){
   if(pass.value===note.password){
     lock.style.display='none';
@@ -176,48 +104,55 @@ function unlock(){
   }else err.textContent='Password salah';
 }
 
+/* ================= VIEWS ================= */
 async function addView(){
-  await supabase.from('views').insert({note_id:id});
+  await supabase.rpc('increment_view', {nid:id});
 }
 
 async function countViews(){
-  const {count}=await supabase
+  const {data} = await supabase
     .from('views')
-    .select('*',{count:'exact',head:true})
-    .eq('note_id',id);
-  views.textContent=count;
+    .select('count')
+    .eq('note_id',id)
+    .limit(1);
+
+  views.textContent = data?.[0]?.count || 0;
 }
 
-async function onlineJoin(){
-  await supabase.from('online_users').insert({
+/* ================= ONLINE ================= */
+async function joinOnline(){
+  await supabase.from('online').upsert({
     note_id:id,
-    session_id:session
+    user_id:session,
+    last_seen:new Date()
   });
 
   setInterval(()=>{
-    supabase.from('online_users')
+    supabase.from('online')
       .update({last_seen:new Date()})
-      .eq('session_id',session);
+      .eq('user_id',session);
   },15000);
 }
 
 async function countOnline(){
-  const {count}=await supabase
-    .from('online_users')
+  const {count} = await supabase
+    .from('online')
     .select('*',{count:'exact',head:true})
     .eq('note_id',id)
     .gte('last_seen',new Date(Date.now()-30000).toISOString());
-  online.textContent=count;
+
+  online.textContent = count;
 }
 
+/* ================= REALTIME ================= */
 function realtime(){
-  supabase.channel('realtime')
-    .on('postgres_changes',{event:'INSERT',table:'views'},countViews)
-    .on('postgres_changes',{event:'INSERT',table:'online_users'},countOnline)
-    .on('postgres_changes',{event:'UPDATE',table:'online_users'},countOnline)
+  supabase.channel('rt')
+    .on('postgres_changes',{event:'*',table:'views'},countViews)
+    .on('postgres_changes',{event:'*',table:'online'},countOnline)
     .subscribe();
 }
 
+/* ================= UTILS ================= */
 function copy(){navigator.clipboard.writeText(location.href)}
 function share(){navigator.share?.({title:note.title,url:location.href})}
 
