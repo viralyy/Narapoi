@@ -100,9 +100,8 @@ async function load(){
 
 /* ========= SHOW CONTENT ========= */
 function show(){
-  let html = note.content;
+  let html = note.content || '';
 
-  // auto linkify (ubah URL polos jadi <a>)
   html = html.replace(
     /(https?:\/\/[^\s<]+)/g,
     '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
