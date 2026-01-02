@@ -51,37 +51,53 @@ body{margin:0;background:#f3f4f6;font-family:system-ui}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
+/* ===== SUPABASE ===== */
 const { createClient } = supabase;
 const sb = createClient(
   "https://reglvenhbvmyqujoydil.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZ2x2ZW5oYnZteXF1am95ZGlsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcyMzc2MDQsImV4cCI6MjA4MjgxMzYwNH0.h-UEIR98TT8TynjraSQi7iwUrnCQ0nLuFJKaHPbOSUc"
 );
 
+/* ===== VAR ===== */
 const id = new URLSearchParams(location.search).get('id');
-const session = crypto.randomUUID();
-const today = new Date().toISOString().slice(0,10);
+
+/* === SESSION FIX (INI PENTING) === */
+let session = localStorage.getItem('online_session');
+if(!session){
+  session = crypto.randomUUID();
+  localStorage.setItem('online_session', session);
+}
+
 let note;
 
-/* ========= LOAD ========= */
+/* ===== LOAD NOTE ===== */
 async function load(){
-  if(!id) return document.body.innerHTML='NOT FOUND';
+  if(!id){
+    document.body.innerHTML = 'NOT FOUND';
+    return;
+  }
 
-  const { data } = await sb
+  const { data, error } = await sb
     .from('notes')
     .select('*')
-    .eq('id',id)
+    .eq('id', id)
     .maybeSingle();
 
-  if(!data) return document.body.innerHTML='NOT FOUND';
+  if(error || !data){
+    document.body.innerHTML = 'NOT FOUND';
+    return;
+  }
 
   note = data;
   title.textContent = note.title;
 
-  if(note.visibility==='private'){
-    lock.style.display='block';
-  } else show();
+  if(note.visibility === 'private'){
+    lock.style.display = 'block';
+  }else{
+    show();
+  }
 
-  handleViewOncePerDay();
+  addView();
   joinOnline();
   refresh();
   realtime();
@@ -92,68 +108,61 @@ function show(){
   content.style.display = 'block';
 }
 
-/* ========= PASSWORD ========= */
+/* ===== PASSWORD ===== */
 function unlock(){
-  if(pass.value===note.password){
-    lock.style.display='none';
+  if(pass.value === note.password){
+    lock.style.display = 'none';
     show();
-  } else err.textContent='Password salah';
+  }else{
+    err.textContent = 'Password salah';
+  }
 }
 
-/* ========= VIEWS (1x / hari / device) ========= */
-async function handleViewOncePerDay(){
-  const key = `viewed_${id}_${today}`;
-  if(localStorage.getItem(key)) return;
-
-  await sb.from('views').insert({
-    note_id: id,
-    view_date: today
-  });
-
-  localStorage.setItem(key,'1');
-  countViews();
+/* ===== VIEWS (AMAN) ===== */
+async function addView(){
+  await sb.from('views').insert({ note_id: id });
 }
 
 async function countViews(){
   const { count } = await sb
     .from('views')
-    .select('*',{count:'exact',head:true})
-    .eq('note_id',id);
+    .select('*', { count:'exact', head:true })
+    .eq('note_id', id);
 
   views.textContent = count || 0;
 }
 
-/* ========= ONLINE (REAL USER) ========= */
+/* ===== ONLINE (FIXED) ===== */
 async function joinOnline(){
-  await sb.from('online_users').insert({
-    note_id:id,
-    session_id:session,
-    last_seen:new Date().toISOString()
+  await sb.from('online_users').upsert({
+    note_id: id,
+    session_id: session,
+    last_seen: new Date().toISOString()
   });
 
   setInterval(()=>{
     sb.from('online_users')
-      .update({last_seen:new Date().toISOString()})
-      .eq('session_id',session);
-  },15000);
+      .update({ last_seen: new Date().toISOString() })
+      .eq('session_id', session);
+  }, 15000);
 }
 
 async function countOnline(){
   const { count } = await sb
     .from('online_users')
-    .select('*',{count:'exact',head:true})
-    .eq('note_id',id)
+    .select('*', { count:'exact', head:true })
+    .eq('note_id', id)
     .gte('last_seen', new Date(Date.now()-30000).toISOString());
 
   online.textContent = count || 0;
 }
 
-/* ========= REALTIME ========= */
+/* ===== REALTIME ===== */
 function realtime(){
   sb.channel('note-'+id)
-    .on('postgres_changes',{event:'INSERT',table:'views'},countViews)
-    .on('postgres_changes',{event:'INSERT',table:'online_users'},countOnline)
-    .on('postgres_changes',{event:'UPDATE',table:'online_users'},countOnline)
+    .on('postgres_changes',{event:'INSERT',table:'views',filter:`note_id=eq.${id}`},countViews)
+    .on('postgres_changes',{event:'INSERT',table:'online_users',filter:`note_id=eq.${id}`},countOnline)
+    .on('postgres_changes',{event:'UPDATE',table:'online_users',filter:`note_id=eq.${id}`},countOnline)
     .subscribe();
 }
 
@@ -162,9 +171,9 @@ function refresh(){
   countOnline();
 }
 
-/* ========= UTILS ========= */
-function copy(){navigator.clipboard.writeText(location.href)}
-function share(){navigator.share?.({title:note.title,url:location.href})}
+/* ===== UTILS ===== */
+function copy(){ navigator.clipboard.writeText(location.href); }
+function share(){ navigator.share?.({ title: note.title, url: location.href }); }
 
 load();
 </script>
