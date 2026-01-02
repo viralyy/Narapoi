@@ -6,7 +6,6 @@
 <title>View Note</title>
 
 <style>
-/* === TAMPILAN TIDAK DIUBAH === */
 *{box-sizing:border-box}
 body{margin:0;background:#f3f4f6;font-family:system-ui}
 .wrap{max-width:720px;margin:14px auto;background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.1);overflow:hidden}
@@ -14,7 +13,6 @@ body{margin:0;background:#f3f4f6;font-family:system-ui}
 .header h2{margin:0;font-size:20px}
 .meta{display:flex;gap:16px;font-size:13px;color:#555;margin-top:6px}
 .meta span{display:flex;align-items:center;gap:6px}
-.meta svg{width:16px;height:16px;stroke:#111}
 .content{padding:14px;line-height:1.6}
 .content img{max-width:100%;border-radius:6px}
 .lock{padding:16px}
@@ -62,32 +60,31 @@ const id = new URLSearchParams(location.search).get('id');
 const session = crypto.randomUUID();
 let note;
 
-/* ================= LOAD NOTE ================= */
+/* ===== LOAD NOTE ===== */
 async function load(){
   const {data,error} = await supabase
     .from('notes')
     .select('*')
     .eq('id',id)
-    .limit(1);
+    .maybeSingle();
 
-  if(error || !data || data.length===0){
-    document.body.innerHTML='NOT FOUND';
+  if(error || !data){
+    document.body.innerHTML = 'NOT FOUND';
     return;
   }
 
-  note = data[0];
+  note = data;
   title.textContent = note.title;
 
-  if(note.visibility==='private'){
-    lock.style.display='block';
+  if(note.visibility === 'private'){
+    lock.style.display = 'block';
   }else{
     show();
   }
 
   addView();
   joinOnline();
-  countViews();
-  countOnline();
+  refresh();
   realtime();
 }
 
@@ -96,68 +93,74 @@ function show(){
   content.style.display = 'block';
 }
 
-/* ================= PRIVATE ================= */
+/* ===== PASSWORD ===== */
 function unlock(){
-  if(pass.value===note.password){
-    lock.style.display='none';
+  if(pass.value === note.password){
+    lock.style.display = 'none';
     show();
-  }else err.textContent='Password salah';
+  }else{
+    err.textContent = 'Password salah';
+  }
 }
 
-/* ================= VIEWS ================= */
+/* ===== VIEWS ===== */
 async function addView(){
-  await supabase.rpc('increment_view', {nid:id});
+  await supabase.from('views').insert({ note_id:id });
 }
 
 async function countViews(){
-  const {data} = await supabase
+  const {count} = await supabase
     .from('views')
-    .select('count')
-    .eq('note_id',id)
-    .limit(1);
+    .select('*',{count:'exact',head:true})
+    .eq('note_id',id);
 
-  views.textContent = data?.[0]?.count || 0;
+  views.textContent = count || 0;
 }
 
-/* ================= ONLINE ================= */
+/* ===== ONLINE ===== */
 async function joinOnline(){
-  await supabase.from('online').upsert({
+  await supabase.from('online_users').insert({
     note_id:id,
-    user_id:session,
-    last_seen:new Date()
+    session_id:session,
+    last_seen:new Date().toISOString()
   });
 
   setInterval(()=>{
-    supabase.from('online')
-      .update({last_seen:new Date()})
-      .eq('user_id',session);
+    supabase.from('online_users')
+      .update({last_seen:new Date().toISOString()})
+      .eq('session_id',session);
   },15000);
 }
 
 async function countOnline(){
   const {count} = await supabase
-    .from('online')
+    .from('online_users')
     .select('*',{count:'exact',head:true})
     .eq('note_id',id)
-    .gte('last_seen',new Date(Date.now()-30000).toISOString());
+    .gte('last_seen', new Date(Date.now()-30000).toISOString());
 
-  online.textContent = count;
+  online.textContent = count || 0;
 }
 
-/* ================= REALTIME ================= */
+/* ===== REALTIME ===== */
 function realtime(){
-  supabase.channel('rt')
-    .on('postgres_changes',{event:'*',table:'views'},countViews)
-    .on('postgres_changes',{event:'*',table:'online'},countOnline)
+  supabase.channel('note-'+id)
+    .on('postgres_changes',{event:'INSERT',table:'views',filter:`note_id=eq.${id}`},countViews)
+    .on('postgres_changes',{event:'INSERT',table:'online_users',filter:`note_id=eq.${id}`},countOnline)
+    .on('postgres_changes',{event:'UPDATE',table:'online_users',filter:`note_id=eq.${id}`},countOnline)
     .subscribe();
 }
 
-/* ================= UTILS ================= */
+function refresh(){
+  countViews();
+  countOnline();
+}
+
+/* ===== UTILS ===== */
 function copy(){navigator.clipboard.writeText(location.href)}
 function share(){navigator.share?.({title:note.title,url:location.href})}
 
 load();
 </script>
-
 </body>
 </html>
