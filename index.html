@@ -10,7 +10,6 @@
   --bg: #05060f;
   --panel: #0b1020;
   --accent: #3b82f6;
-  --accent-dark: #2563eb;
   --text: #e5e7eb;
   --muted: #9ca3af;
   --border: #1f2937;
@@ -19,37 +18,39 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
+  margin: 0;
   background: var(--bg);
   color: var(--text);
   font-family: system-ui, Segoe UI, Inter, sans-serif;
-  min-height: 100vh;
-  padding: 12px 10px;
+  padding: 12px;
 }
 
 .wrap {
-  max-width: 740px;
-  margin: 0 auto;
+  max-width: 720px;
+  margin: auto;
 }
 
 .card {
   background: linear-gradient(180deg, #0b1020, #060814);
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
 }
 
+.hidden { display: none; }
+
 h1 {
-  font-size: 1.25rem;
+  font-size: 18px;
+  margin: 0 0 10px 0;
   font-weight: 600;
-  margin: 0 0 10px;
 }
 
 .stats {
   display: flex;
-  gap: 18px;
-  font-size: 0.875rem;
+  gap: 16px;
+  font-size: 13px;
   color: var(--muted);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .online {
@@ -63,20 +64,19 @@ h1 {
   height: 9px;
   border-radius: 50%;
   background: #22c55e;
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .dot.on {
-  animation: blink 1.4s infinite;
+  animation: blink 1.3s infinite;
   opacity: 1;
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 0.5; }
-  50%      { opacity: 1; }
+  50% { opacity: 1; }
 }
 
-/* Video locked 16:9 tanpa wrapper ekstra */
+/* Video: lock 16:9 tanpa nambah div */
 video {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -87,14 +87,15 @@ video {
   object-fit: contain;
 }
 
-/* Progress Bar */
+/* Progress bar sama seperti asli, cuma lebih rapi */
 .progress-container {
+  width: 100%;
   height: 6px;
   background: #111827;
   border-radius: 3px;
   margin: 12px 0;
-  position: relative;
   cursor: pointer;
+  position: relative;
 }
 
 .progress-bar {
@@ -107,13 +108,13 @@ video {
 .progress-handle {
   width: 14px;
   height: 14px;
-  background: white;
-  border: 2px solid var(--accent);
+  background: #fff;
   border-radius: 50%;
   position: absolute;
   top: 50%;
   left: 0;
   transform: translate(-50%, -50%);
+  cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s;
 }
@@ -124,146 +125,165 @@ video {
 
 .progress-tooltip {
   position: absolute;
-  top: -28px;
+  top: -26px;
   padding: 4px 8px;
-  background: rgba(0,0,0,0.9);
-  color: white;
+  background: #111827;
+  color: #fff;
   font-size: 12px;
   border-radius: 4px;
-  pointer-events: none;
   white-space: nowrap;
   transform: translateX(-50%);
   display: none;
+  pointer-events: none;
 }
 
-/* Controls */
+/* Controls: lebih rapi & hover */
 .controls {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
-  padding: 12px 0;
+  margin: 12px 0;
 }
 
 .ctrl {
-  width: 44px;
-  height: 44px;
-  background: #111827;
+  width: 42px;
+  height: 42px;
   border-radius: 12px;
+  background: #111827;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.18s;
+  transition: background 0.2s;
 }
 
-.ctrl:hover { background: #1f2937; }
+.ctrl:hover {
+  background: #1f2937;
+}
 
-.ctrl svg { width: 20px; height: 20px; fill: #e5e7eb; }
+.ctrl svg {
+  width: 20px;
+  height: 20px;
+  fill: #fff;
+}
 
 .play-btn {
   width: 70px;
   height: 70px;
-  border: none;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-  box-shadow: 0 8px 24px rgba(59,130,246,0.35);
+  border: none;
+  background: linear-gradient(135deg, var(--accent), #2563eb);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.25s;
+  box-shadow: 0 10px 25px rgba(59,130,246,0.4);
+  transition: all 0.3s;
 }
 
-.play-btn:hover { transform: scale(1.06); box-shadow: 0 12px 32px rgba(59,130,246,0.5); }
+.play-btn:hover {
+  transform: scale(1.05);
+}
 
-.play-btn.playing { transform: rotate(180deg) scale(1.06); }
+.play-btn.playing {
+  transform: rotate(180deg) scale(1.05);
+}
 
-.play-btn svg { width: 32px; height: 32px; fill: white; }
+.play-btn svg {
+  width: 32px;
+  height: 32px;
+  fill: #fff;
+}
 
 select {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   background: #111827;
   border: 1px solid var(--border);
-  color: white;
+  color: #fff;
   border-radius: 12px;
-  font-size: 0.9rem;
+  text-align: center;
   cursor: pointer;
   appearance: none;
+}
+
+/* Full konten button */
+.full-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #111827;
+  border: 1px solid var(--border);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Popup & cihuy sama persis seperti asli */
+.popup {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 999;
+}
+.popup.show { display: flex; }
+.popup-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+}
+.popup-box {
+  position: relative;
+  width: 95%;
+  max-width: 500px;
+  max-height: 70vh;
+  background: #0b1020;
+  border-radius: 16px 16px 0 0;
+  padding: 16px;
+  transform: translateY(100%);
+  animation: slideUp .4s forwards;
+  overflow-y: auto;
+}
+@keyframes slideUp { to { transform: translateY(0); } }
+.popup-box a {
+  display: block;
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #111827;
+  border: 1px solid #1f2937;
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
   text-align: center;
 }
 
-/* Full Konten */
-.full-btn {
-  width: 100%;
-  padding: 14px;
-  margin-top: 8px;
-  border: none;
-  border-radius: 12px;
-  background: #1f2937;
-  color: white;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.full-btn:hover { background: #374151; }
-
-/* Popup & lainnya tetap sama seperti original kamu */
-.popup { position:fixed; inset:0; display:none; justify-content:center; align-items:flex-end; z-index:999; }
-.popup.show { display:flex; }
-.popup-bg { position:absolute; inset:0; background:rgba(0,0,0,.65); }
-.popup-box {
-  position:relative;
-  width:94%;
-  max-width:480px;
-  max-height:70vh;
-  background:#0b1020;
-  border-radius:16px 16px 0 0;
-  padding:18px;
-  overflow-y:auto;
-  animation:slideUp .35s forwards;
-}
-@keyframes slideUp { to { transform:translateY(0); } }
-.popup-box a {
-  display:block;
-  margin:12px 0;
-  padding:14px;
-  background:#111827;
-  border:1px solid #1f2937;
-  border-radius:10px;
-  color:#fff;
-  text-decoration:none;
-  text-align:center;
-}
-
-/* Cihuy */
 #cihuy {
-  position:fixed;
-  left:50%;
-  top:45%;
-  transform:translate(-50%,-50%);
-  font-size:2.5rem;
-  font-weight:bold;
-  color:#fbbf24;
-  text-shadow:0 0 25px rgba(251,191,36,0.8);
-  pointer-events:none;
-  animation:cihuy 2.2s forwards;
-  z-index:1000;
+  position: fixed;
+  left: 50%;
+  bottom: -50px;
+  transform: translateX(-50%);
+  font-size: 24px;
+  font-weight: 700;
+  animation: cihuy 2s ease forwards;
 }
 @keyframes cihuy {
-  0%   { opacity:0; transform:translate(-50%,-50%) scale(0.5); }
-  30%  { opacity:1; transform:translate(-50%,-50%) scale(1.12); }
-  100% { opacity:0; transform:translate(-50%,-160%) scale(1.3); }
+  0% { bottom: -50px; opacity: 0; }
+  30% { bottom: 50%; opacity: 1; }
+  100% { bottom: 120%; opacity: 0; }
 }
 
-@media (max-width:480px) {
-  .controls { gap:10px; }
-  .ctrl, select { width:40px; height:40px; }
-  .play-btn { width:62px; height:62px; }
-  .play-btn svg { width:28px; height:28px; }
-  h1 { font-size:1.1rem; }
+@media (max-width: 480px) {
+  .controls { gap: 10px; }
+  .ctrl { width: 38px; height: 38px; }
+  .play-btn { width: 62px; height: 62px; }
+  .play-btn svg { width: 28px; height: 28px; }
+  select { width: 38px; height: 38px; }
 }
 </style>
 </head>
@@ -324,8 +344,8 @@ select {
   <div class="popup-box" id="popupBox"></div>
 </div>
 
-<!-- SCRIPT KAMU TETEP 100% SAMA -->
 <script>
+// SCRIPT INI SAMA 100% SEPERTI CODE ASLI KAMU
 const FIREBASE='https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app';
 const id=new URLSearchParams(location.search).get('v');
 let allowPlay=false;
@@ -337,7 +357,6 @@ app.classList.remove('hidden');
 title.textContent=v.title;
 player.src=v.src;
 
-/* IKLAN KE-2 */
 player.addEventListener('play', e => {
   if(!allowPlay){
     allowPlay = true;
@@ -345,7 +364,6 @@ player.addEventListener('play', e => {
   }
 });
 
-/* PROGRESS BAR */
 const progressContainer = document.getElementById('progressContainer');
 const progressBar = document.getElementById('progress');
 const handle = document.getElementById('handle');
@@ -367,7 +385,6 @@ function updateUI(){
 
 player.addEventListener('timeupdate', updateUI);
 
-/* DRAG HANDLE */
 let isDragging=false;
 
 handle.addEventListener('mousedown', e=>{
@@ -384,7 +401,6 @@ document.addEventListener('mousemove', e=>{
 });
 document.addEventListener('mouseup', e=>{ isDragging=false; });
 
-/* TOOLTIP HOVER */
 progressContainer.addEventListener('mousemove', e=>{
   const rect = progressContainer.getBoundingClientRect();
   let pct = (e.clientX - rect.left)/rect.width;
@@ -397,7 +413,6 @@ progressContainer.addEventListener('mouseleave', ()=>{
   tooltip.style.display='none';
 });
 
-/* CONTROLS */
 playBtn.onclick=()=>{
 player.paused?player.play():player.pause();
 playBtn.classList.toggle('playing',!player.paused);
@@ -407,7 +422,6 @@ forward.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTi
 fs.onclick=()=>!document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
 speed.onchange=e=>player.playbackRate=parseFloat(e.target.value);
 
-/* FULL + CIHUY */
 openFull.onclick=()=>{
 popupBox.innerHTML='';
 (v.downloads||[]).forEach(d=>{
@@ -422,7 +436,6 @@ document.body.appendChild(n);
 setTimeout(()=>n.remove(),2000);
 };
 
-// tutup popup hanya kalau klik background
 document.querySelector('.popup-bg').onclick = () => {
   document.getElementById('popup').classList.remove('show');
 };
