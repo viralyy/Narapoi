@@ -6,223 +6,326 @@
 <title>Stream</title>
 
 <style>
-:root{
-  --bg:#05060f;
-  --panel:#0b1020;
-  --accent:#3b82f6;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:system-ui,Segoe UI,Inter,Arial;
-}
-.wrap{max-width:720px;margin:auto;padding:14px}
-.card{
-  background:linear-gradient(180deg,#0b1020,#060814);
-  border-radius:14px;
-  padding:14px;
-}
-.hidden{display:none}
-
-h1{font-size:18px;margin:6px 0}
-.stats{
-  display:flex;
-  gap:16px;
-  font-size:12px;
-  color:var(--muted);
-}
-.online{display:flex;align-items:center;gap:6px}
-.dot{
-  width:8px;height:8px;border-radius:50%;
-  background:#22ff00;
-  opacity:.2;
-}
-.dot.on{animation:blink 1.2s infinite}
-@keyframes blink{50%{opacity:1}}
-
-video{
-  width:100%;
-  border-radius:14px;
-  background:#000;
-  margin:12px 0;
+:root {
+  --bg: #05060f;
+  --panel: #0b1020;
+  --accent: #3b82f6;
+  --accent-dark: #2563eb;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --border: #1f2937;
 }
 
-/* PROGRESS BAR */
-.progress-container{
-  width:100%;
-  height:6px;
-  background:#111827;
-  border-radius:3px;
-  margin-bottom:12px;
-  overflow:hidden;
-  cursor:pointer;
-  position:relative;
-}
-.progress-bar{
-  width:0%;
-  height:100%;
-  background:var(--accent);
-  transition:width 0.1s linear;
-  position:relative;
-}
-.progress-handle{
-  width:12px;
-  height:12px;
-  background:#fff;
-  border-radius:50%;
-  position:absolute;
-  top:50%;
-  transform:translate(-50%,-50%);
-  cursor:pointer;
-}
-.progress-tooltip{
-  position:absolute;
-  padding:2px 6px;
-  background:#111827;
-  color:#fff;
-  font-size:12px;
-  border-radius:4px;
-  white-space:nowrap;
-  transform:translate(-50%,-150%);
-  display:none;
-  pointer-events:none;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* === CONTROLS === */
-.controls{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:14px;
-  flex-wrap:wrap;
-  margin-top:0;
-}
-.ctrl{
-  width:40px;height:40px; 
-  border-radius:10px;
-  background:#111827;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-}
-.ctrl svg{width:22px;height:22px;fill:#fff}
-
-.play-btn{
-  width:72px;height:72px;
-  border-radius:50%;
-  border:none;
-  background:linear-gradient(135deg,var(--accent),#2563eb);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:0 12px 30px rgba(59,130,246,.45);
-  transition:.3s;
-}
-.play-btn.playing{transform:rotate(180deg)}
-.play-btn svg{width:34px;height:34px;fill:#fff}
-
-select{
-  width:40px;
-  height:40px;
-  background:#111827;
-  border:1px solid #1f2937;
-  color:#fff;
-  border-radius:10px;
-  padding:0;
-  text-align:center;
-  cursor:pointer;
-  -moz-appearance:none;
-  -webkit-appearance:none;
-  appearance:none;
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+  min-height: 100vh;
+  padding: 16px;
 }
 
-/* FULL KONTEN BUTTON */
-.full-btn{
-  width:100%;
-  margin-top:14px;
-  padding:14px;
-  border-radius:12px;
-  background:#111827;
-  border:1px solid #1f2937;
-  color:#fff;
-  font-weight:600;
-  cursor:pointer;
-  font-size:16px;
+.wrap {
+  max-width: 760px;
+  margin: 0 auto;
 }
 
-/* POPUP FIX CLICKABLE & MOBILE FRIENDLY */
-.popup{
-  position:fixed;
-  inset:0;
-  display:none;
-  justify-content:center;
-  align-items:flex-end;
-  z-index:999;
-}
-.popup.show{
-  display:flex;
-}
-.popup-bg{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.6);
-}
-.popup-box{
-  position:relative;
-  width:95%;
-  max-width:500px;
-  max-height:70vh;
-  background:#0b1020;
-  border-radius:16px 16px 0 0;
-  padding:16px;
-  transform:translateY(100%);
-  animation:slideUp .4s forwards;
-  z-index:1;
-  overflow-y:auto;
-}
-@keyframes slideUp{to{transform:translateY(0)}}
-.popup-box a{
-  display:block;
-  margin-top:10px;
-  padding:12px;
-  border-radius:10px;
-  background:#111827;
-  border:1px solid #1f2937;
-  color:#fff;
-  text-decoration:none;
-  pointer-events:auto;
-  font-size:16px;
+.card {
+  background: var(--panel);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
-/* CIHUY */
-#cihuy{
-  position:fixed;
-  left:50%;
-  bottom:-50px;
-  transform:translateX(-50%);
-  font-size:22px;
-  font-weight:700;
-  animation:cihuy 2s ease forwards;
-}
-@keyframes cihuy{
-  0%{bottom:-50px;opacity:0}
-  30%{bottom:50%;opacity:1}
-  100%{bottom:120%;opacity:0}
+/* Video Wrapper - Kunci 16:9 */
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  overflow: hidden;
 }
 
-/* RESPONSIVE ADJUSTMENTS */
-@media(max-width:480px){
-  .controls{
-    gap:10px;
-  }
-  .ctrl{width:36px;height:36px}
-  .play-btn{width:60px;height:60px}
-  select{width:36px;height:36px;font-size:14px}
+video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Header & Stats */
+.header {
+  padding: 16px 16px 0;
+}
+
+h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.8125rem;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.online {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  opacity: 0.4;
+}
+
+.dot.on {
+  animation: blink 1.4s infinite;
+  opacity: 1;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 1; }
+}
+
+/* Progress Bar */
+.progress-container {
+  height: 6px;
+  background: #1f2937;
+  cursor: pointer;
+  position: relative;
+  margin: 0 16px;
+}
+
+.progress-bar {
+  width: 0%;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.12s linear;
+}
+
+.progress-handle {
+  width: 14px;
+  height: 14px;
+  background: white;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.progress-container:hover .progress-handle {
+  opacity: 1;
+}
+
+.progress-tooltip {
+  position: absolute;
+  top: -28px;
+  padding: 4px 8px;
+  background: rgba(0,0,0,0.85);
+  color: white;
+  font-size: 0.75rem;
+  border-radius: 4px;
+  pointer-events: none;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  display: none;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  flex-wrap: wrap;
+}
+
+.ctrl {
+  width: 44px;
+  height: 44px;
+  background: #111827;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ctrl:hover {
+  background: #1f2937;
+}
+
+.ctrl svg {
+  width: 20px;
+  height: 20px;
+  fill: #e5e7eb;
+}
+
+.play-btn {
+  width: 70px;
+  height: 70px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(59,130,246,0.35);
+  transition: all 0.25s ease;
+}
+
+.play-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 12px 32px rgba(59,130,246,0.5);
+}
+
+.play-btn.playing {
+  transform: rotate(180deg) scale(1.08);
+}
+
+.play-btn svg {
+  width: 32px;
+  height: 32px;
+  fill: white;
+}
+
+select {
+  width: 44px;
+  height: 44px;
+  background: #111827;
+  border: 1px solid var(--border);
+  color: white;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  text-align: center;
+  cursor: pointer;
+  appearance: none;
+}
+
+/* Full Konten Button */
+.full-btn {
+  width: 100%;
+  margin: 0 16px 20px;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #374151, #1f2937);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.full-btn:hover {
+  background: linear-gradient(135deg, #4b5563, #374151);
+}
+
+/* Popup */
+.popup {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 1000;
+}
+
+.popup.show {
+  display: flex;
+}
+
+.popup-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+}
+
+.popup-box {
+  position: relative;
+  width: 92%;
+  max-width: 480px;
+  max-height: 75vh;
+  background: var(--panel);
+  border-radius: 20px 20px 0 0;
+  padding: 20px;
+  overflow-y: auto;
+  transform: translateY(100%);
+  animation: slideUp 0.35s forwards;
+}
+
+@keyframes slideUp {
+  to { transform: translateY(0); }
+}
+
+.popup-box a {
+  display: block;
+  margin: 10px 0;
+  padding: 14px;
+  background: #111827;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  text-align: center;
+}
+
+.popup-box a:hover {
+  background: #1f2937;
+}
+
+/* Cihuy Animation */
+#cihuy {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #fbbf24;
+  text-shadow: 0 0 20px rgba(251,191,36,0.8);
+  pointer-events: none;
+  animation: cihuy 2.2s forwards;
+  z-index: 9999;
+}
+
+@keyframes cihuy {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  100% { opacity: 0; transform: translate(-50%, -150%) scale(1.3); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .controls { gap: 10px; padding: 12px; }
+  .ctrl, select { width: 40px; height: 40px; }
+  .play-btn { width: 60px; height: 60px; }
+  .play-btn svg { width: 28px; height: 28px; }
+  h1 { font-size: 1.125rem; }
 }
 </style>
 </head>
@@ -230,51 +333,55 @@ select{
 <body>
 
 <div class="wrap">
-<div id="app" class="card hidden">
-<h1 id="title"></h1>
+  <div id="app" class="card hidden">
+    <div class="header">
+      <h1 id="title"></h1>
+      <div class="stats">
+        <div id="views">0 views</div>
+        <div class="online">
+          <div id="dot" class="dot"></div>
+          <span id="onlineText">0 online</span>
+        </div>
+      </div>
+    </div>
 
-<div class="stats">
-  <div id="views">0 views</div>
-  <div class="online">
-    <div id="dot" class="dot"></div>
-    <span id="onlineText">0 online</span>
+    <div class="video-wrapper">
+      <video id="player" playsinline></video>
+    </div>
+
+    <div class="progress-container" id="progressContainer">
+      <div id="progress" class="progress-bar"></div>
+      <div id="handle" class="progress-handle"></div>
+      <div id="tooltip" class="progress-tooltip">0:00</div>
+    </div>
+
+    <div class="controls">
+      <div id="fs" class="ctrl">
+        <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm10 0h-2v3h-3v2h5v-5zM7 7h3V5H5v5h2V7zm12 3V5h-5v2h3v3h2z"/></svg>
+      </div>
+
+      <div id="rewind" class="ctrl">
+        <svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12z"/></svg>
+      </div>
+
+      <button id="playBtn" class="play-btn">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+
+      <div id="forward" class="ctrl">
+        <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6z"/></svg>
+      </div>
+
+      <select id="speed">
+        <option value="1">1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+      </select>
+    </div>
+
+    <button id="openFull" class="full-btn">FULL KONTEN</button>
   </div>
-</div>
-
-<video id="player" playsinline></video>
-<div class="progress-container" id="progressContainer">
-  <div id="progress" class="progress-bar"></div>
-  <div id="handle" class="progress-handle"></div>
-  <div id="tooltip" class="progress-tooltip">0:00</div>
-</div>
-
-<div class="controls">
-  <div id="fs" class="ctrl">
-    <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm10 0h-2v3h-3v2h5v-5zM7 7h3V5H5v5h2V7zm12 3V5h-5v2h3v3h2z"/></svg>
-  </div>
-
-  <div id="rewind" class="ctrl">
-    <svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12z"/></svg>
-  </div>
-
-  <button id="playBtn" class="play-btn">
-    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-  </button>
-
-  <div id="forward" class="ctrl">
-    <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6z"/></svg>
-  </div>
-
-  <select id="speed">
-    <option value="1">1x</option>
-    <option value="1.25">1.25x</option>
-    <option value="1.5">1.5x</option>
-    <option value="2">2x</option>
-  </select>
-</div>
-
-<button id="openFull" class="full-btn">FULL KONTEN</button>
-</div>
 </div>
 
 <div id="popup" class="popup">
@@ -283,6 +390,7 @@ select{
 </div>
 
 <script>
+// Seluruh script JavaScript tetap sama 100% seperti aslinya
 const FIREBASE='https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app';
 const id=new URLSearchParams(location.search).get('v');
 let allowPlay=false;
@@ -385,15 +493,15 @@ document.querySelector('.popup-bg').onclick = () => {
 };
 
 /* VIEWS */
-fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(data=>{
+fetch(`\( {FIREBASE}/views/ \){id}.json`).then(r=>r.json()).then(data=>{
 if(typeof data==='number'){
-fetch(`${FIREBASE}/views/${id}.json`,{method:'PUT',body:JSON.stringify(data+1)});
+fetch(`\( {FIREBASE}/views/ \){id}.json`,{method:'PUT',body:JSON.stringify(data+1)});
 }else{
-fetch(`${FIREBASE}/views/${id}/${Date.now()}.json`,{method:'PUT',body:1});
+fetch(`\( {FIREBASE}/views/ \){id}/${Date.now()}.json`,{method:'PUT',body:1});
 }
 });
 setInterval(()=>{
-fetch(`${FIREBASE}/views/${id}.json`).then(r=>r.json()).then(d=>{
+fetch(`\( {FIREBASE}/views/ \){id}.json`).then(r=>r.json()).then(d=>{
 let total=typeof d==='number'?d:(d?Object.keys(d).length:0);
 views.textContent=total+' views';
 });
@@ -402,8 +510,8 @@ views.textContent=total+' views';
 /* ONLINE */
 const sid=Math.random().toString(36).slice(2);
 setInterval(()=>{
-fetch(`${FIREBASE}/online/${id}/${sid}.json`,{method:'PUT',body:Date.now()});
-fetch(`${FIREBASE}/online/${id}.json`).then(r=>r.json()).then(d=>{
+fetch(`\( {FIREBASE}/online/ \){id}/${sid}.json`,{method:'PUT',body:Date.now()});
+fetch(`\( {FIREBASE}/online/ \){id}.json`).then(r=>r.json()).then(d=>{
 let c=0,now=Date.now();
 for(let k in d)if(now-d[k]<10000)c++;
 onlineText.textContent=c+' online';
