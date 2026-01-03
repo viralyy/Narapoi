@@ -25,10 +25,7 @@ body {
   padding: 12px;
 }
 
-.wrap {
-  max-width: 720px;
-  margin: auto;
-}
+.wrap { max-width: 720px; margin: auto; }
 
 .card {
   background: linear-gradient(180deg, #0b1020, #060814);
@@ -39,44 +36,9 @@ body {
 
 .hidden { display: none; }
 
-h1 {
-  font-size: 18px;
-  margin: 0 0 10px 0;
-  font-weight: 600;
-}
+h1 { font-size: 18px; margin: 0 0 12px; font-weight: 600; }
 
-.stats {
-  display: flex;
-  gap: 16px;
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 12px;
-}
-
-.online {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: #22c55e;
-  opacity: 0.4;
-}
-
-.dot.on {
-  animation: blink 1.3s infinite;
-  opacity: 1;
-}
-
-@keyframes blink {
-  50% { opacity: 1; }
-}
-
-/* Video: lock 16:9 tanpa nambah div */
+/* Video locked 16:9 */
 video {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -87,15 +49,14 @@ video {
   object-fit: contain;
 }
 
-/* Progress bar sama seperti asli, cuma lebih rapi */
+/* Progress bar */
 .progress-container {
-  width: 100%;
   height: 6px;
   background: #111827;
   border-radius: 3px;
   margin: 12px 0;
-  cursor: pointer;
   position: relative;
+  cursor: pointer;
 }
 
 .progress-bar {
@@ -106,26 +67,21 @@ video {
 }
 
 .progress-handle {
-  width: 14px;
-  height: 14px;
+  width: 14px; height: 14px;
   background: #fff;
   border-radius: 50%;
   position: absolute;
-  top: 50%;
-  left: 0;
+  top: 50%; left: 0;
   transform: translate(-50%, -50%);
-  cursor: pointer;
   opacity: 0;
   transition: opacity 0.2s;
 }
 
-.progress-container:hover .progress-handle {
-  opacity: 1;
-}
+.progress-container:hover .progress-handle { opacity: 1; }
 
 .progress-tooltip {
   position: absolute;
-  top: -26px;
+  top: -28px; left: 0;
   padding: 4px 8px;
   background: #111827;
   color: #fff;
@@ -137,21 +93,20 @@ video {
   pointer-events: none;
 }
 
-/* Controls: lebih rapi & hover */
+/* Controls: dirapihin biar rata & simetris */
 .controls {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-  margin: 12px 0;
+  max-width: 320px;
+  margin: 16px auto 0;
+  gap: 10px;
 }
 
 .ctrl {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+  width: 44px; height: 44px;
   background: #111827;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -159,70 +114,55 @@ video {
   transition: background 0.2s;
 }
 
-.ctrl:hover {
-  background: #1f2937;
-}
+.ctrl:hover { background: #1f2937; }
 
-.ctrl svg {
-  width: 20px;
-  height: 20px;
-  fill: #fff;
-}
+.ctrl svg { width: 20px; height: 20px; fill: #e5e7eb; }
 
 .play-btn {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
+  width: 72px; height: 72px;
   border: none;
+  border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), #2563eb);
+  box-shadow: 0 10px 25px rgba(59,130,246,0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 25px rgba(59,130,246,0.4);
   transition: all 0.3s;
 }
 
-.play-btn:hover {
-  transform: scale(1.05);
-}
+.play-btn:hover { transform: scale(1.05); }
 
-.play-btn.playing {
-  transform: rotate(180deg) scale(1.05);
-}
+.play-btn.playing { transform: rotate(180deg) scale(1.05); }
 
-.play-btn svg {
-  width: 32px;
-  height: 32px;
-  fill: #fff;
-}
+.play-btn svg { width: 34px; height: 34px; fill: #fff; }
 
 select {
-  width: 42px;
-  height: 42px;
+  width: 44px; height: 44px;
   background: #111827;
   border: 1px solid var(--border);
   color: #fff;
   border-radius: 12px;
+  font-size: 14px;
   text-align: center;
   cursor: pointer;
   appearance: none;
 }
 
-/* Full konten button */
+/* Full Konten button */
 .full-btn {
   width: 100%;
-  margin-top: 12px;
+  margin-top: 16px;
   padding: 14px;
+  border: none;
   border-radius: 12px;
-  background: #111827;
-  border: 1px solid var(--border);
+  background: #1f2937;
   color: #fff;
   font-weight: 600;
-  cursor: pointer;
   font-size: 16px;
+  cursor: pointer;
 }
 
-/* Popup & cihuy sama persis seperti asli */
+/* Popup FULL KONTEN */
 .popup {
   position: fixed;
   inset: 0;
@@ -230,60 +170,118 @@ select {
   justify-content: center;
   align-items: flex-end;
   z-index: 999;
+  background: rgba(0,0,0,0.6);
 }
-.popup.show { display: flex; }
-.popup-bg {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,.6);
+
+.popup.show {
+  display: flex;
+  animation: fadeIn 0.4s;
 }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 .popup-box {
-  position: relative;
-  width: 95%;
-  max-width: 500px;
+  width: 92%;
+  max-width: 480px;
   max-height: 70vh;
   background: #0b1020;
   border-radius: 16px 16px 0 0;
-  padding: 16px;
-  transform: translateY(100%);
-  animation: slideUp .4s forwards;
+  padding: 20px;
   overflow-y: auto;
-}
-@keyframes slideUp { to { transform: translateY(0); } }
-.popup-box a {
-  display: block;
-  margin-top: 10px;
-  padding: 12px;
-  border-radius: 10px;
-  background: #111827;
-  border: 1px solid #1f2937;
-  color: #fff;
-  text-decoration: none;
-  font-size: 16px;
-  text-align: center;
+  transform: translateY(100%);
+  animation: slideUp 0.4s forwards;
+  position: relative;
 }
 
-#cihuy {
-  position: fixed;
-  left: 50%;
-  bottom: -50px;
-  transform: translateX(-50%);
-  font-size: 24px;
-  font-weight: 700;
-  animation: cihuy 2s ease forwards;
+@keyframes slideUp { to { transform: translateY(0); } }
+
+.popup-box a {
+  display: block;
+  margin: 12px 0;
+  padding: 14px;
+  background: #111827;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: #fff;
+  text-decoration: none;
+  text-align: center;
+  font-size: 16px;
 }
-@keyframes cihuy {
-  0% { bottom: -50px; opacity: 0; }
-  30% { bottom: 50%; opacity: 1; }
-  100% { bottom: 120%; opacity: 0; }
+
+/* Snow effect */
+.snow {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.snowflake {
+  position: absolute;
+  top: -10px;
+  width: 10px;
+  height: 10px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: fall linear infinite;
+}
+
+@keyframes fall {
+  to { transform: translateY(100vh) rotate(360deg); }
+}
+
+/* Welcome Popup */
+.welcome-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1001;
+}
+
+.welcome-box {
+  width: 90%;
+  max-width: 400px;
+  background: #0b1020;
+  border-radius: 16px;
+  padding: 24px;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 24px;
+  color: var(--muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.close-btn:hover { color: #fff; }
+
+.welcome-box p {
+  margin: 0 0 16px;
+  font-size: 16px;
+}
+
+.welcome-box a {
+  color: var(--accent);
+  text-decoration: underline;
+  font-weight: 600;
 }
 
 @media (max-width: 480px) {
-  .controls { gap: 10px; }
-  .ctrl { width: 38px; height: 38px; }
-  .play-btn { width: 62px; height: 62px; }
-  .play-btn svg { width: 28px; height: 28px; }
-  select { width: 38px; height: 38px; }
+  .controls { max-width: 280px; gap: 8px; }
+  .ctrl, select { width: 40px; height: 40px; }
+  .play-btn { width: 64px; height: 64px; }
+  .play-btn svg { width: 30px; height: 30px; }
 }
 </style>
 </head>
@@ -291,193 +289,199 @@ select {
 <body>
 
 <div class="wrap">
-<div id="app" class="card hidden">
-<h1 id="title"></h1>
+  <div id="app" class="card hidden">
+    <h1 id="title"></h1>
 
-<div class="stats">
-  <div id="views">0 views</div>
-  <div class="online">
-    <div id="dot" class="dot"></div>
-    <span id="onlineText">0 online</span>
+    <video id="player" playsinline></video>
+
+    <div class="progress-container" id="progressContainer">
+      <div id="progress" class="progress-bar"></div>
+      <div id="handle" class="progress-handle"></div>
+      <div id="tooltip" class="progress-tooltip">0:00</div>
+    </div>
+
+    <div class="controls">
+      <div id="fs" class="ctrl">
+        <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm10 0h-2v3h-3v2h5v-5zM7 7h3V5H5v5h2V7zm12 3V5h-5v2h3v3h2z"/></svg>
+      </div>
+
+      <div id="rewind" class="ctrl">
+        <svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12z"/></svg>
+      </div>
+
+      <button id="playBtn" class="play-btn">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+
+      <div id="forward" class="ctrl">
+        <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6z"/></svg>
+      </div>
+
+      <select id="speed">
+        <option value="1">1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+      </select>
+    </div>
+
+    <button id="openFull" class="full-btn">FULL KONTEN</button>
   </div>
 </div>
 
-<video id="player" playsinline></video>
-
-<div class="progress-container" id="progressContainer">
-  <div id="progress" class="progress-bar"></div>
-  <div id="handle" class="progress-handle"></div>
-  <div id="tooltip" class="progress-tooltip">0:00</div>
-</div>
-
-<div class="controls">
-  <div id="fs" class="ctrl">
-    <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm10 0h-2v3h-3v2h5v-5zM7 7h3V5H5v5h2V7zm12 3V5h-5v2h3v3h2z"/></svg>
-  </div>
-
-  <div id="rewind" class="ctrl">
-    <svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12z"/></svg>
-  </div>
-
-  <button id="playBtn" class="play-btn">
-    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-  </button>
-
-  <div id="forward" class="ctrl">
-    <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6z"/></svg>
-  </div>
-
-  <select id="speed">
-    <option value="1">1x</option>
-    <option value="1.25">1.25x</option>
-    <option value="1.5">1.5x</option>
-    <option value="2">2x</option>
-  </select>
-</div>
-
-<button id="openFull" class="full-btn">FULL KONTEN</button>
-</div>
-</div>
-
+<!-- Popup FULL KONTEN -->
 <div id="popup" class="popup">
-  <div class="popup-bg"></div>
   <div class="popup-box" id="popupBox"></div>
 </div>
 
+<!-- Snow container -->
+<div id="snowContainer" class="snow"></div>
+
+<!-- Welcome Popup -->
+<div id="welcomePopup" class="welcome-popup">
+  <div class="welcome-box">
+    <button class="close-btn" id="closeWelcome">×</button>
+    <p>Selamat menonton dan menikmati para colikiawan,<br>kalo suka jangan lupa SUBSCRIBE Youtube <a href="https://youtube.com/@narapoi" target="_blank">@Narapoi</a></p>
+  </div>
+</div>
+
 <script>
-// SCRIPT INI SAMA 100% SEPERTI CODE ASLI KAMU
-const FIREBASE='https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app';
-const id=new URLSearchParams(location.search).get('v');
-let allowPlay=false;
+// SCRIPT UTAMA (tanpa views/online Firebase)
+const id = new URLSearchParams(location.search).get('v');
+let allowPlay = false;
 
-fetch('/videos').then(r=>r.json()).then(videos=>{
-if(!id||!videos[id])return;
-const v=videos[id];
-app.classList.remove('hidden');
-title.textContent=v.title;
-player.src=v.src;
+// Views pake localStorage (naik tiap buka halaman)
+if (!localStorage.getItem('views_' + id)) {
+  localStorage.setItem('views_' + id, '1');
+} else {
+  let current = parseInt(localStorage.getItem('views_' + id));
+  localStorage.setItem('views_' + id, current + 1);
+}
 
-player.addEventListener('play', e => {
-  if(!allowPlay){
-    allowPlay = true;
-    // showAd();
+// Tampilkan views (opsional, kalau mau tampilkan bisa uncomment)
+// views.textContent = localStorage.getItem('views_' + id) + ' views';
+
+fetch('/videos').then(r => r.json()).then(videos => {
+  if (!id || !videos[id]) return;
+  const v = videos[id];
+  app.classList.remove('hidden');
+  title.textContent = v.title;
+  player.src = v.src;
+
+  player.addEventListener('play', () => {
+    if (!allowPlay) {
+      allowPlay = true;
+      // showAd();
+    }
+  });
+
+  // PROGRESS BAR (sama seperti asli)
+  const progressContainer = document.getElementById('progressContainer');
+  const progressBar = document.getElementById('progress');
+  const handle = document.getElementById('handle');
+  const tooltip = document.getElementById('tooltip');
+
+  const formatTime = s => {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  };
+
+  function updateUI() {
+    const pct = (player.currentTime / player.duration) * 100 || 0;
+    progressBar.style.width = pct + '%';
+    handle.style.left = pct + '%';
+    tooltip.style.left = pct + '%';
+    tooltip.textContent = formatTime(player.currentTime);
   }
+
+  player.addEventListener('timeupdate', updateUI);
+
+  let isDragging = false;
+  handle.addEventListener('mousedown', e => { isDragging = true; e.preventDefault(); });
+  document.addEventListener('mousemove', e => {
+    if (!isDragging) return;
+    const rect = progressContainer.getBoundingClientRect();
+    let pct = (e.clientX - rect.left) / rect.width;
+    pct = Math.max(0, Math.min(1, pct));
+    player.currentTime = pct * player.duration;
+    updateUI();
+  });
+  document.addEventListener('mouseup', () => { isDragging = false; });
+
+  progressContainer.addEventListener('mousemove', e => {
+    const rect = progressContainer.getBoundingClientRect();
+    let pct = (e.clientX - rect.left) / rect.width;
+    pct = Math.max(0, Math.min(1, pct));
+    tooltip.style.display = 'block';
+    tooltip.style.left = (pct * 100) + '%';
+    tooltip.textContent = formatTime(pct * player.duration);
+  });
+  progressContainer.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+
+  // CONTROLS
+  playBtn.onclick = () => {
+    player.paused ? player.play() : player.pause();
+    playBtn.classList.toggle('playing', !player.paused);
+  };
+  rewind.onclick = () => player.currentTime = Math.max(0, player.currentTime - 5);
+  forward.onclick = () => player.currentTime = Math.min(player.duration, player.currentTime + 5);
+  fs.onclick = () => !document.fullscreenElement ? player.requestFullscreen() : document.exitFullscreen();
+  speed.onchange = e => player.playbackRate = parseFloat(e.target.value);
+
+  // FULL KONTEN + SALJU
+  openFull.onclick = () => {
+    popupBox.innerHTML = '';
+    (v.downloads || []).forEach(d => {
+      const a = document.createElement('a');
+      a.href = d.url;
+      a.target = '_blank';
+      a.textContent = d.label;
+      popupBox.appendChild(a);
+    });
+    popup.classList.add('show');
+
+    // Efek salju
+    const snowContainer = document.getElementById('snowContainer');
+    snowContainer.innerHTML = '';
+    for (let i = 0; i < 60; i++) {
+      const flake = document.createElement('div');
+      flake.className = 'snowflake';
+      flake.style.left = Math.random() * 100 + '%';
+      flake.style.animationDuration = (Math.random() * 3 + 5) + 's';
+      flake.style.animationDelay = Math.random() * 5 + 's';
+      flake.style.opacity = Math.random() * 0.5 + 0.5;
+      snowContainer.appendChild(flake);
+    }
+
+    // Hilangkan salju setelah 8 detik
+    setTimeout(() => { snowContainer.innerHTML = ''; }, 8000);
+  };
+
+  document.querySelector('.popup-bg')?.onclick || document.addEventListener('click', e => {
+    if (e.target.classList.contains('popup')) popup.classList.remove('show');
+  });
+
 });
 
-const progressContainer = document.getElementById('progressContainer');
-const progressBar = document.getElementById('progress');
-const handle = document.getElementById('handle');
-const tooltip = document.getElementById('tooltip');
-
-const formatTime = s=>{
-  const m=Math.floor(s/60);
-  const sec=Math.floor(s%60);
-  return m+':'+(sec<10?'0':'')+sec;
-};
-
-function updateUI(){
-  const pct = (player.currentTime / player.duration) * 100 || 0;
-  progressBar.style.width = pct + '%';
-  handle.style.left = pct + '%';
-  tooltip.style.left = pct + '%';
-  tooltip.textContent = formatTime(player.currentTime);
+// Welcome Popup (hanya muncul sekali)
+if (!localStorage.getItem('welcomed')) {
+  document.getElementById('welcomePopup').style.display = 'flex';
+  localStorage.setItem('welcomed', 'true');
 }
 
-player.addEventListener('timeupdate', updateUI);
-
-let isDragging=false;
-
-handle.addEventListener('mousedown', e=>{
-  isDragging=true;
-  e.preventDefault();
-});
-document.addEventListener('mousemove', e=>{
-  if(!isDragging) return;
-  const rect = progressContainer.getBoundingClientRect();
-  let pct = (e.clientX - rect.left)/rect.width;
-  pct = Math.max(0, Math.min(1, pct));
-  player.currentTime = pct * player.duration;
-  updateUI();
-});
-document.addEventListener('mouseup', e=>{ isDragging=false; });
-
-progressContainer.addEventListener('mousemove', e=>{
-  const rect = progressContainer.getBoundingClientRect();
-  let pct = (e.clientX - rect.left)/rect.width;
-  pct = Math.max(0, Math.min(1, pct));
-  tooltip.style.display='block';
-  tooltip.style.left = (pct*100)+'%';
-  tooltip.textContent = formatTime(pct*player.duration);
-});
-progressContainer.addEventListener('mouseleave', ()=>{
-  tooltip.style.display='none';
-});
-
-playBtn.onclick=()=>{
-player.paused?player.play():player.pause();
-playBtn.classList.toggle('playing',!player.paused);
+document.getElementById('closeWelcome').onclick = () => {
+  document.getElementById('welcomePopup').style.display = 'none';
 };
-rewind.onclick=()=>player.currentTime=Math.max(0,player.currentTime-5);
-forward.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTime+5);
-fs.onclick=()=>!document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
-speed.onchange=e=>player.playbackRate=parseFloat(e.target.value);
-
-openFull.onclick=()=>{
-popupBox.innerHTML='';
-(v.downloads||[]).forEach(d=>{
-const a=document.createElement('a');
-a.href=d.url;a.target='_blank';a.textContent=d.label;
-popupBox.appendChild(a);
-});
-popup.classList.add('show');
-const n=document.createElement('div');
-n.id='cihuy';n.textContent='CIHUY🗿';
-document.body.appendChild(n);
-setTimeout(()=>n.remove(),2000);
-};
-
-document.querySelector('.popup-bg').onclick = () => {
-  document.getElementById('popup').classList.remove('show');
-};
-
-/* VIEWS */
-fetch(`\( {FIREBASE}/views/ \){id}.json`).then(r=>r.json()).then(data=>{
-if(typeof data==='number'){
-fetch(`\( {FIREBASE}/views/ \){id}.json`,{method:'PUT',body:JSON.stringify(data+1)});
-}else{
-fetch(`\( {FIREBASE}/views/ \){id}/${Date.now()}.json`,{method:'PUT',body:1});
-}
-});
-setInterval(()=>{
-fetch(`\( {FIREBASE}/views/ \){id}.json`).then(r=>r.json()).then(d=>{
-let total=typeof d==='number'?d:(d?Object.keys(d).length:0);
-views.textContent=total+' views';
-});
-},3000);
-
-/* ONLINE */
-const sid=Math.random().toString(36).slice(2);
-setInterval(()=>{
-fetch(`\( {FIREBASE}/online/ \){id}/${sid}.json`,{method:'PUT',body:Date.now()});
-fetch(`\( {FIREBASE}/online/ \){id}.json`).then(r=>r.json()).then(d=>{
-let c=0,now=Date.now();
-for(let k in d)if(now-d[k]<10000)c++;
-onlineText.textContent=c+' online';
-dot.classList.toggle('on',c>0);
-});
-},4000);
-});
 </script>
 
-<!-- HISTATS -->
+<!-- HISTATS & IKLAN (tetap) -->
 <iframe src="histats.html" style="display:none"></iframe>
-
-<!-- IKLAN KE-1 -->
 <script>
 (function(s){
-s.dataset.zone='10109877';
-s.src='https://al5sm.com/tag.min.js';
-})([document.documentElement,document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+  s.dataset.zone='10109877';
+  s.src='https://al5sm.com/tag.min.js';
+})(document.body.appendChild(document.createElement('script')));
 </script>
 
 </body>
