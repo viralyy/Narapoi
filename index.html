@@ -14,41 +14,78 @@
   --text: #e5e7eb;
   --muted: #9ca3af;
   --border: #1f2937;
+  --card-bg: linear-gradient(180deg, #0b1020, #060814);
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+* { box-sizing: border-box; margin:0; padding:0; }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif;
+  font-family: system-ui, Segoe UI, Inter, sans-serif;
   min-height: 100vh;
-  padding: 16px;
+  padding: 12px;
 }
 
 .wrap {
-  max-width: 760px;
+  max-width: 740px;
   margin: 0 auto;
 }
 
 .card {
-  background: var(--panel);
+  background: var(--card-bg);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
 }
 
-/* Video Wrapper - Kunci 16:9 */
+.header {
+  padding: 16px 16px 8px;
+}
+
+h1 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 10px;
+}
+
+.stats {
+  display: flex;
+  gap: 20px;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.online {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #22c55e;
+  opacity: 0.45;
+}
+
+.dot.on {
+  animation: blink 1.3s infinite;
+  opacity: 1;
+}
+
+@keyframes blink {
+  0%,100% { opacity: 0.45; }
+  50%     { opacity: 1; }
+}
+
+/* Video 16:9 fixed */
 .video-wrapper {
   position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   background: #000;
-  overflow: hidden;
 }
 
 video {
@@ -59,90 +96,44 @@ video {
   object-fit: contain;
 }
 
-/* Header & Stats */
-.header {
-  padding: 16px 16px 0;
-}
-
-h1 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.stats {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-size: 0.8125rem;
-  color: var(--muted);
-  margin-bottom: 16px;
-}
-
-.online {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #22c55e;
-  opacity: 0.4;
-}
-
-.dot.on {
-  animation: blink 1.4s infinite;
-  opacity: 1;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 0.4; }
-  50%      { opacity: 1; }
-}
-
-/* Progress Bar */
+/* Progress */
 .progress-container {
   height: 6px;
-  background: #1f2937;
-  cursor: pointer;
-  position: relative;
+  background: #111827;
   margin: 0 16px;
+  position: relative;
+  cursor: pointer;
 }
 
 .progress-bar {
-  width: 0%;
+  width: 0;
   height: 100%;
   background: var(--accent);
-  transition: width 0.12s linear;
+  transition: width 0.1s linear;
 }
 
 .progress-handle {
   width: 14px;
   height: 14px;
-  background: white;
+  background: #fff;
   border: 2px solid var(--accent);
   border-radius: 50%;
   position: absolute;
   top: 50%;
-  left: 0;
   transform: translate(-50%, -50%);
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.18s;
 }
 
-.progress-container:hover .progress-handle {
-  opacity: 1;
-}
+.progress-container:hover .progress-handle { opacity: 1; }
 
 .progress-tooltip {
   position: absolute;
-  top: -28px;
+  top: -26px;
+  left: 0;
   padding: 4px 8px;
-  background: rgba(0,0,0,0.85);
-  color: white;
+  background: rgba(0,0,0,0.9);
+  color: #fff;
   font-size: 0.75rem;
   border-radius: 4px;
   pointer-events: none;
@@ -162,8 +153,8 @@ h1 {
 }
 
 .ctrl {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   background: #111827;
   border-radius: 12px;
   display: flex;
@@ -173,75 +164,67 @@ h1 {
   transition: background 0.2s;
 }
 
-.ctrl:hover {
-  background: #1f2937;
-}
+.ctrl:hover { background: #1f2937; }
 
 .ctrl svg {
   width: 20px;
   height: 20px;
-  fill: #e5e7eb;
+  fill: #ddd;
 }
 
 .play-btn {
-  width: 70px;
-  height: 70px;
+  width: 68px;
+  height: 68px;
   border: none;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  box-shadow: 0 6px 20px rgba(59,130,246,0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(59,130,246,0.35);
-  transition: all 0.25s ease;
+  transition: all 0.22s;
 }
 
-.play-btn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 12px 32px rgba(59,130,246,0.5);
-}
+.play-btn:hover { transform: scale(1.06); box-shadow: 0 10px 28px rgba(59,130,246,0.55); }
 
-.play-btn.playing {
-  transform: rotate(180deg) scale(1.08);
-}
+.play-btn.playing { transform: rotate(180deg) scale(1.06); }
 
 .play-btn svg {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   fill: white;
 }
 
 select {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   background: #111827;
   border: 1px solid var(--border);
   color: white;
   border-radius: 12px;
-  font-size: 0.875rem;
-  text-align: center;
+  font-size: 0.9rem;
   cursor: pointer;
   appearance: none;
+  text-align: center;
 }
 
-/* Full Konten Button */
+/* Full button */
 .full-btn {
-  width: 100%;
+  display: block;
+  width: calc(100% - 32px);
   margin: 0 16px 20px;
   padding: 14px;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, #374151, #1f2937);
+  background: #1f2937;
   color: white;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s;
 }
 
-.full-btn:hover {
-  background: linear-gradient(135deg, #4b5563, #374151);
-}
+.full-btn:hover { background: #374151; }
 
 /* Popup */
 .popup {
@@ -250,82 +233,70 @@ select {
   display: none;
   justify-content: center;
   align-items: flex-end;
-  z-index: 1000;
+  z-index: 999;
 }
 
-.popup.show {
-  display: flex;
-}
+.popup.show { display: flex; }
 
 .popup-bg {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.65);
 }
 
 .popup-box {
   position: relative;
-  width: 92%;
-  max-width: 480px;
-  max-height: 75vh;
+  width: 94%;
+  max-width: 460px;
+  max-height: 70vh;
   background: var(--panel);
-  border-radius: 20px 20px 0 0;
+  border-radius: 16px 16px 0 0;
   padding: 20px;
   overflow-y: auto;
-  transform: translateY(100%);
-  animation: slideUp 0.35s forwards;
+  animation: slideUp 0.3s forwards;
 }
 
-@keyframes slideUp {
-  to { transform: translateY(0); }
-}
+@keyframes slideUp { to { transform: translateY(0); } }
 
 .popup-box a {
   display: block;
-  margin: 10px 0;
+  margin: 12px 0;
   padding: 14px;
   background: #111827;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 10px;
   color: white;
-  text-decoration: none;
-  font-weight: 500;
   text-align: center;
+  text-decoration: none;
 }
 
-.popup-box a:hover {
-  background: #1f2937;
-}
-
-/* Cihuy Animation */
+/* Cihuy */
 #cihuy {
   position: fixed;
   left: 50%;
-  top: 50%;
+  top: 40%;
   transform: translate(-50%, -50%);
-  font-size: 2.5rem;
+  font-size: 2.8rem;
   font-weight: bold;
   color: #fbbf24;
-  text-shadow: 0 0 20px rgba(251,191,36,0.8);
+  text-shadow: 0 0 30px rgba(251,191,36,0.7);
   pointer-events: none;
-  animation: cihuy 2.2s forwards;
-  z-index: 9999;
+  animation: cihuy 2s forwards;
+  z-index: 1000;
 }
 
 @keyframes cihuy {
-  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-  30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
-  100% { opacity: 0; transform: translate(-50%, -150%) scale(1.3); }
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+  25%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -180%) scale(1.3); }
 }
 
-/* Responsive */
 @media (max-width: 480px) {
   .controls { gap: 10px; padding: 12px; }
-  .ctrl, select { width: 40px; height: 40px; }
+  .ctrl, select { width: 38px; height: 38px; }
   .play-btn { width: 60px; height: 60px; }
-  .play-btn svg { width: 28px; height: 28px; }
-  h1 { font-size: 1.125rem; }
+  .play-btn svg { width: 26px; height: 26px; }
+  h1 { font-size: 1.15rem; }
 }
 </style>
 </head>
@@ -390,7 +361,7 @@ select {
 </div>
 
 <script>
-// Seluruh script JavaScript tetap sama 100% seperti aslinya
+// SCRIPT SAMA 100% SEPERTI ASLINYA (tidak diubah)
 const FIREBASE='https://views-counter-610fa-default-rtdb.asia-southeast1.firebasedatabase.app';
 const id=new URLSearchParams(location.search).get('v');
 let allowPlay=false;
@@ -402,7 +373,6 @@ app.classList.remove('hidden');
 title.textContent=v.title;
 player.src=v.src;
 
-/* IKLAN KE-2 */
 player.addEventListener('play', e => {
   if(!allowPlay){
     allowPlay = true;
@@ -410,7 +380,6 @@ player.addEventListener('play', e => {
   }
 });
 
-/* PROGRESS BAR */
 const progressContainer = document.getElementById('progressContainer');
 const progressBar = document.getElementById('progress');
 const handle = document.getElementById('handle');
@@ -432,7 +401,6 @@ function updateUI(){
 
 player.addEventListener('timeupdate', updateUI);
 
-/* DRAG HANDLE */
 let isDragging=false;
 
 handle.addEventListener('mousedown', e=>{
@@ -449,7 +417,6 @@ document.addEventListener('mousemove', e=>{
 });
 document.addEventListener('mouseup', e=>{ isDragging=false; });
 
-/* TOOLTIP HOVER */
 progressContainer.addEventListener('mousemove', e=>{
   const rect = progressContainer.getBoundingClientRect();
   let pct = (e.clientX - rect.left)/rect.width;
@@ -462,7 +429,6 @@ progressContainer.addEventListener('mouseleave', ()=>{
   tooltip.style.display='none';
 });
 
-/* CONTROLS */
 playBtn.onclick=()=>{
 player.paused?player.play():player.pause();
 playBtn.classList.toggle('playing',!player.paused);
@@ -472,7 +438,6 @@ forward.onclick=()=>player.currentTime=Math.min(player.duration,player.currentTi
 fs.onclick=()=>!document.fullscreenElement?player.requestFullscreen():document.exitFullscreen();
 speed.onchange=e=>player.playbackRate=parseFloat(e.target.value);
 
-/* FULL + CIHUY */
 openFull.onclick=()=>{
 popupBox.innerHTML='';
 (v.downloads||[]).forEach(d=>{
@@ -487,7 +452,6 @@ document.body.appendChild(n);
 setTimeout(()=>n.remove(),2000);
 };
 
-// tutup popup hanya kalau klik background
 document.querySelector('.popup-bg').onclick = () => {
   document.getElementById('popup').classList.remove('show');
 };
@@ -531,6 +495,6 @@ s.dataset.zone='10109877';
 s.src='https://al5sm.com/tag.min.js';
 })([document.documentElement,document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
 </script>
-  
+
 </body>
 </html>
