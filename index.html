@@ -36,9 +36,11 @@ body {
 
 .hidden { display: none; }
 
-h1 { font-size: 18px; margin: 0 0 12px; font-weight: 600; }
+h1 { font-size: 18px; margin: 0 0 8px; font-weight: 600; }
 
-/* Video locked 16:9 */
+#views { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+
+/* Video */
 video {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -59,12 +61,7 @@ video {
   cursor: pointer;
 }
 
-.progress-bar {
-  width: 0%;
-  height: 100%;
-  background: var(--accent);
-  transition: width 0.1s linear;
-}
+.progress-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.1s linear; }
 
 .progress-handle {
   width: 14px; height: 14px;
@@ -93,7 +90,7 @@ video {
   pointer-events: none;
 }
 
-/* Controls: dirapihin biar rata & simetris */
+/* Controls rata */
 .controls {
   display: flex;
   justify-content: space-between;
@@ -148,7 +145,6 @@ select {
   appearance: none;
 }
 
-/* Full Konten button */
 .full-btn {
   width: 100%;
   margin-top: 16px;
@@ -162,7 +158,7 @@ select {
   cursor: pointer;
 }
 
-/* Popup FULL KONTEN */
+/* Popup FULL KONTEN - animasi lebih halus */
 .popup {
   position: fixed;
   inset: 0;
@@ -170,112 +166,83 @@ select {
   justify-content: center;
   align-items: flex-end;
   z-index: 999;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
 }
 
 .popup.show {
   display: flex;
-  animation: fadeIn 0.4s;
 }
-
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .popup-box {
   width: 92%;
   max-width: 480px;
-  max-height: 70vh;
+  max-height: 75vh;
   background: #0b1020;
-  border-radius: 16px 16px 0 0;
-  padding: 20px;
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px;
   overflow-y: auto;
-  transform: translateY(100%);
-  animation: slideUp 0.4s forwards;
-  position: relative;
+  transform: translateY(30px) scale(0.95);
+  opacity: 0;
+  transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
 }
 
-@keyframes slideUp { to { transform: translateY(0); } }
+.popup.show .popup-box {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
 
+.tutorial {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(59,130,246,0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(59,130,246,0.3);
+}
+
+.tutorial h3 {
+  font-size: 16px;
+  margin: 0 0 12px;
+  color: var(--accent);
+}
+
+.tutorial p {
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.tutorial strong { color: #fff; }
+
+/* Link download */
 .popup-box a {
   display: block;
   margin: 12px 0;
   padding: 14px;
   background: #111827;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 12px;
   color: #fff;
   text-decoration: none;
   text-align: center;
-  font-size: 16px;
+  font-size: 15px;
+  transition: background 0.2s;
 }
 
-/* Snow effect */
-.snow {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1000;
-}
+.popup-box a:hover { background: #1f2937; }
 
-.snowflake {
-  position: absolute;
-  top: -10px;
-  width: 10px;
-  height: 10px;
-  background: white;
-  border-radius: 50%;
-  opacity: 0.8;
-  animation: fall linear infinite;
-}
+/* Snow & welcome popup sama seperti sebelumnya (ga gue ubah) */
+.snow { position: fixed; inset: 0; pointer-events: none; z-index: 1000; }
+.snowflake { position: absolute; top: -10px; width: 10px; height: 10px; background: white; border-radius: 50%; opacity: 0.8; animation: fall linear infinite; }
+@keyframes fall { to { transform: translateY(100vh) rotate(360deg); } }
 
-@keyframes fall {
-  to { transform: translateY(100vh) rotate(360deg); }
-}
-
-/* Welcome Popup */
-.welcome-popup {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1001;
-}
-
-.welcome-box {
-  width: 90%;
-  max-width: 400px;
-  background: #0b1020;
-  border-radius: 16px;
-  padding: 24px;
-  position: relative;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-}
-
-.close-btn {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  font-size: 24px;
-  color: var(--muted);
-  cursor: pointer;
-  background: none;
-  border: none;
-}
-
+.welcome-popup { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1001; }
+.welcome-box { width: 90%; max-width: 400px; background: #0b1020; border-radius: 16px; padding: 24px; position: relative; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+.close-btn { position: absolute; top: 12px; right: 16px; font-size: 24px; color: var(--muted); cursor: pointer; background: none; border: none; }
 .close-btn:hover { color: #fff; }
-
-.welcome-box p {
-  margin: 0 0 16px;
-  font-size: 16px;
-}
-
-.welcome-box a {
-  color: var(--accent);
-  text-decoration: underline;
-  font-weight: 600;
-}
+.welcome-box p { margin: 0 0 16px; font-size: 16px; }
+.welcome-box a { color: var(--accent); text-decoration: underline; font-weight: 600; }
 
 @media (max-width: 480px) {
   .controls { max-width: 280px; gap: 8px; }
@@ -291,6 +258,7 @@ select {
 <div class="wrap">
   <div id="app" class="card hidden">
     <h1 id="title"></h1>
+    <div id="views">0 views</div>
 
     <video id="player" playsinline></video>
 
@@ -301,22 +269,10 @@ select {
     </div>
 
     <div class="controls">
-      <div id="fs" class="ctrl">
-        <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm10 0h-2v3h-3v2h5v-5zM7 7h3V5H5v5h2V7zm12 3V5h-5v2h3v3h2z"/></svg>
-      </div>
-
-      <div id="rewind" class="ctrl">
-        <svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12z"/></svg>
-      </div>
-
-      <button id="playBtn" class="play-btn">
-        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-      </button>
-
-      <div id="forward" class="ctrl">
-        <svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6z"/></svg>
-      </div>
-
+      <div id="fs" class="ctrl"><svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm10 0h-2v3h-3v2h5v-5zM7 7h3V5H5v5h2V7zm12 3V5h-5v2h3v3h2z"/></svg></div>
+      <div id="rewind" class="ctrl"><svg viewBox="0 0 24 24"><path d="M11 18V6L2.5 12z"/></svg></div>
+      <button id="playBtn" class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+      <div id="forward" class="ctrl"><svg viewBox="0 0 24 24"><path d="M13 6v12l8.5-6z"/></svg></div>
       <select id="speed">
         <option value="1">1x</option>
         <option value="1.25">1.25x</option>
@@ -329,15 +285,12 @@ select {
   </div>
 </div>
 
-<!-- Popup FULL KONTEN -->
 <div id="popup" class="popup">
   <div class="popup-box" id="popupBox"></div>
 </div>
 
-<!-- Snow container -->
 <div id="snowContainer" class="snow"></div>
 
-<!-- Welcome Popup -->
 <div id="welcomePopup" class="welcome-popup">
   <div class="welcome-box">
     <button class="close-btn" id="closeWelcome">×</button>
@@ -346,20 +299,22 @@ select {
 </div>
 
 <script>
-// SCRIPT UTAMA (tanpa views/online Firebase)
+// SCRIPT (sama seperti sebelumnya + update popup)
 const id = new URLSearchParams(location.search).get('v');
 let allowPlay = false;
 
-// Views pake localStorage (naik tiap buka halaman)
-if (!localStorage.getItem('views_' + id)) {
-  localStorage.setItem('views_' + id, '1');
+let viewKey = 'views_' + id;
+if (!localStorage.getItem(viewKey)) {
+  localStorage.setItem(viewKey, '1');
 } else {
-  let current = parseInt(localStorage.getItem('views_' + id));
-  localStorage.setItem('views_' + id, current + 1);
+  let current = parseInt(localStorage.getItem(viewKey));
+  localStorage.setItem(viewKey, current + 1);
 }
 
-// Tampilkan views (opsional, kalau mau tampilkan bisa uncomment)
-// views.textContent = localStorage.getItem('views_' + id) + ' views';
+const viewsElement = document.getElementById('views');
+if (viewsElement) {
+  viewsElement.textContent = localStorage.getItem(viewKey) + ' views';
+}
 
 fetch('/videos').then(r => r.json()).then(videos => {
   if (!id || !videos[id]) return;
@@ -371,11 +326,10 @@ fetch('/videos').then(r => r.json()).then(videos => {
   player.addEventListener('play', () => {
     if (!allowPlay) {
       allowPlay = true;
-      // showAd();
     }
   });
 
-  // PROGRESS BAR (sama seperti asli)
+  // PROGRESS BAR & CONTROLS (dipendekin biar fokus ke popup)
   const progressContainer = document.getElementById('progressContainer');
   const progressBar = document.getElementById('progress');
   const handle = document.getElementById('handle');
@@ -419,7 +373,6 @@ fetch('/videos').then(r => r.json()).then(videos => {
   });
   progressContainer.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
 
-  // CONTROLS
   playBtn.onclick = () => {
     player.paused ? player.play() : player.pause();
     playBtn.classList.toggle('playing', !player.paused);
@@ -429,9 +382,16 @@ fetch('/videos').then(r => r.json()).then(videos => {
   fs.onclick = () => !document.fullscreenElement ? player.requestFullscreen() : document.exitFullscreen();
   speed.onchange = e => player.playbackRate = parseFloat(e.target.value);
 
-  // FULL KONTEN + SALJU
+  // FULL KONTEN POPUP dengan tutorial
   openFull.onclick = () => {
-    popupBox.innerHTML = '';
+    popupBox.innerHTML = `
+      <div class="tutorial">
+        <h3>Tutorial download?</h3>
+        <p><strong>1.</strong> klik FULL KONTEN Lalu klik FULL PACK nya</p>
+        <p><strong>2.</strong> jika mau download satu persatu bisa di klik tombol fullscreen lalu klik titik tiga di bawah kanan atau di player bisa di klik lama pada video lalu DOWNLOAD VIDEO</p>
+      </div>
+    `;
+
     (v.downloads || []).forEach(d => {
       const a = document.createElement('a');
       a.href = d.url;
@@ -439,9 +399,10 @@ fetch('/videos').then(r => r.json()).then(videos => {
       a.textContent = d.label;
       popupBox.appendChild(a);
     });
+
     popup.classList.add('show');
 
-    // Efek salju
+    // Salju
     const snowContainer = document.getElementById('snowContainer');
     snowContainer.innerHTML = '';
     for (let i = 0; i < 60; i++) {
@@ -453,18 +414,15 @@ fetch('/videos').then(r => r.json()).then(videos => {
       flake.style.opacity = Math.random() * 0.5 + 0.5;
       snowContainer.appendChild(flake);
     }
-
-    // Hilangkan salju setelah 8 detik
     setTimeout(() => { snowContainer.innerHTML = ''; }, 8000);
   };
 
-  document.querySelector('.popup-bg')?.onclick || document.addEventListener('click', e => {
+  document.addEventListener('click', e => {
     if (e.target.classList.contains('popup')) popup.classList.remove('show');
   });
-
 });
 
-// Welcome Popup (hanya muncul sekali)
+// Welcome popup
 if (!localStorage.getItem('welcomed')) {
   document.getElementById('welcomePopup').style.display = 'flex';
   localStorage.setItem('welcomed', 'true');
@@ -475,7 +433,6 @@ document.getElementById('closeWelcome').onclick = () => {
 };
 </script>
 
-<!-- HISTATS & IKLAN (tetap) -->
 <iframe src="histats.html" style="display:none"></iframe>
 <script>
 (function(s){
