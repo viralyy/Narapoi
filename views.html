@@ -58,17 +58,8 @@ p{
   font-weight:700;
   margin:10px 0;
 }
-.domain{
-  font-size:13px;
-  color:#cbd5f5;
-  background:#020617;
-  border:1px solid var(--border);
-  padding:10px;
-  border-radius:12px;
-  word-break:break-all;
-}
 button{
-  margin-top:16px;
+  margin-top:18px;
   width:100%;
   padding:14px;
   border-radius:14px;
@@ -78,9 +69,11 @@ button{
   font-size:15px;
   font-weight:600;
   cursor:pointer;
-  display:none;
+  opacity:.6;
 }
-button:hover{opacity:.95}
+button.active{
+  opacity:1;
+}
 small{
   display:block;
   margin-top:14px;
@@ -103,25 +96,23 @@ small{
 <body>
 
 <div class="card">
-  <h1>Preparing Link</h1>
-  <p>Mohon tunggu sebentar</p>
+  <h1>Prepare Your Link</h1>
+  <p>Silakan tunggu sebentar</p>
 
   <div class="loader"></div>
 
   <div class="timer" id="time">5</div>
 
-  <div class="domain" id="domain">checking…</div>
+  <button id="go" disabled>Lanjutkan</button>
 
-  <button id="go">Lanjutkan</button>
-
-  <!-- SLOT IKLAN (optional) -->
+  <!-- SLOT IKLAN OPTIONAL -->
   <!--
   <div class="ad-slot">
     Iklan tampil di sini
   </div>
   -->
 
-  <small>Jika tidak otomatis, klik tombol lanjutkan</small>
+  <small>Klik tombol setelah waktu habis</small>
 </div>
 
 <script>
@@ -135,12 +126,9 @@ function decode(x){
 
 const url=decode(r);
 if(!url || !url.startsWith("http")){
-  document.body.innerHTML="<h3 style='color:white'>❌ Link tidak valid</h3>";
+  document.body.innerHTML="<h3 style='color:white'>Link tidak valid</h3>";
   throw "";
 }
-
-const domainEl=document.getElementById("domain");
-domainEl.textContent=new URL(url).hostname;
 
 let t=5;
 const timer=document.getElementById("time");
@@ -151,12 +139,17 @@ const iv=setInterval(()=>{
   timer.textContent=t;
   if(t<=0){
     clearInterval(iv);
-    btn.style.display="block";
-    setTimeout(()=>location.href=url,800);
+    btn.disabled=false;
+    btn.classList.add("active");
+    timer.textContent="✓";
   }
 },1000);
 
-btn.onclick=()=>location.href=url;
+btn.onclick=()=>{
+  if(!btn.disabled){
+    location.href=url;
+  }
+};
 </script>
 
 </body>
