@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Preparing Link…</title>
+
+<style>
+:root{
+  --bg:#05060f;
+  --card:#0b1020;
+  --accent:#3b82f6;
+  --muted:#94a3b8;
+  --border:#1e293b;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:radial-gradient(70% 70% at 50% 0%,#0b1020,#05060f);
+  font-family:system-ui,Segoe UI,Arial;
+  color:#fff;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.card{
+  width:100%;
+  max-width:360px;
+  background:rgba(11,16,32,.88);
+  backdrop-filter:blur(14px);
+  padding:28px;
+  border-radius:22px;
+  box-shadow:0 25px 50px rgba(0,0,0,.45);
+  text-align:center;
+}
+h1{
+  margin:0 0 6px;
+  font-size:22px;
+}
+p{
+  margin:0 0 18px;
+  color:var(--muted);
+  font-size:14px;
+}
+.loader{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  border:3px solid #1e293b;
+  border-top-color:var(--accent);
+  margin:20px auto;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.timer{
+  font-size:32px;
+  font-weight:700;
+  margin:10px 0;
+}
+.domain{
+  font-size:13px;
+  color:#cbd5f5;
+  background:#020617;
+  border:1px solid var(--border);
+  padding:10px;
+  border-radius:12px;
+  word-break:break-all;
+}
+button{
+  margin-top:16px;
+  width:100%;
+  padding:14px;
+  border-radius:14px;
+  border:0;
+  background:linear-gradient(135deg,#2563eb,#3b82f6);
+  color:#fff;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  display:none;
+}
+button:hover{opacity:.95}
+small{
+  display:block;
+  margin-top:14px;
+  font-size:12px;
+  color:#64748b;
+}
+.ad-slot{
+  margin-top:18px;
+  height:60px;
+  border:1px dashed #1e293b;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  color:#475569;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Preparing Link</h1>
+  <p>Mohon tunggu sebentar</p>
+
+  <div class="loader"></div>
+
+  <div class="timer" id="time">5</div>
+
+  <div class="domain" id="domain">checking…</div>
+
+  <button id="go">Lanjutkan</button>
+
+  <!-- SLOT IKLAN (optional) -->
+  <!--
+  <div class="ad-slot">
+    Iklan tampil di sini
+  </div>
+  -->
+
+  <small>Jika tidak otomatis, klik tombol lanjutkan</small>
+</div>
+
+<script>
+const q=new URLSearchParams(location.search);
+const r=q.get("r");
+
+function decode(x){
+  try{return decodeURIComponent(atob(x))}
+  catch(e){return null}
+}
+
+const url=decode(r);
+if(!url || !url.startsWith("http")){
+  document.body.innerHTML="<h3 style='color:white'>❌ Link tidak valid</h3>";
+  throw "";
+}
+
+const domainEl=document.getElementById("domain");
+domainEl.textContent=new URL(url).hostname;
+
+let t=5;
+const timer=document.getElementById("time");
+const btn=document.getElementById("go");
+
+const iv=setInterval(()=>{
+  t--;
+  timer.textContent=t;
+  if(t<=0){
+    clearInterval(iv);
+    btn.style.display="block";
+    setTimeout(()=>location.href=url,800);
+  }
+},1000);
+
+btn.onclick=()=>location.href=url;
+</script>
+
+</body>
+</html>
