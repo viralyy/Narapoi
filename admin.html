@@ -1,453 +1,508 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Narapoi</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Narapoi</title>
 
-  <style>
-    :root {
-      --bg: #0a0a0a;
-      --surface: #151515;
-      --surface-hover: #1e1e1e;
-      --accent: #3b82f6;
-      --accent-dark: #2563eb;
-      --danger: #dc2626;
-      --text: #f0f0f0;
-      --text-dim: #a0a0a0;
-      --border: #303030;
-      --radius: 12px;
-      --gap: 14px;
-    }
+    <style>
+      :root {
+        --bg: #0a0a0a;
+        --surface: #151515;
+        --surface-hover: #1e1e1e;
+        --accent: #3b82f6;
+        --accent-dark: #2563eb;
+        --danger: #dc2626;
+        --text: #f0f0f0;
+        --text-dim: #a0a0a0;
+        --border: #303030;
+        --radius: 12px;
+        --gap: 14px;
+      }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, sans-serif;
-      padding: 12px;
-      min-height: 100vh;
-      line-height: 1.5;
-    }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, sans-serif;
+        padding: 12px;
+        min-height: 100vh;
+        line-height: 1.5;
+      }
 
-    .container {
-      max-width: 540px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: var(--gap);
-    }
+      .container {
+        max-width: 540px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: var(--gap);
+      }
 
-    h1 { font-size: 1.7rem; margin-bottom: 0.4rem; }
-    h3 { font-size: 1.15rem; color: #ddd; margin: 1.2rem 0 0.6rem; }
+      h1 {
+        font-size: 1.7rem;
+        margin-bottom: 0.4rem;
+      }
 
-    input, textarea {
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px 14px;
-      color: white;
-      font-size: 15px;
-    }
+      h3 {
+        font-size: 1.15rem;
+        color: #ddd;
+        margin: 1.2rem 0 0.6rem;
+      }
 
-    input:focus, textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.2);
-    }
+      input,
+      textarea {
+        width: 100%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 14px;
+        color: white;
+        font-size: 15px;
+      }
 
-    button {
-      background: var(--surface);
-      color: white;
-      border: none;
-      border-radius: var(--radius);
-      padding: 12px 16px;
-      font-size: 14.5px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: 0.18s;
-    }
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
 
-    button:hover { background: var(--surface-hover); }
-    button.primary { background: var(--accent); }
-    button.primary:hover { background: var(--accent-dark); }
-    button.danger { background: var(--danger); }
+      button {
+        background: var(--surface);
+        color: white;
+        border: none;
+        border-radius: var(--radius);
+        padding: 12px 16px;
+        font-size: 14.5px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: 0.18s;
+      }
 
-    .download-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      background: var(--surface);
-      padding: 10px 12px;
-      border-radius: 10px;
-      cursor: grab;
-      user-select: none;
-      touch-action: manipulation;
-    }
+      button:hover {
+        background: var(--surface-hover);
+      }
 
-    .download-row.dragging {
-      opacity: 0.6;
-      transform: scale(0.98);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-    }
+      button.primary {
+        background: var(--accent);
+      }
 
-    .download-row input {
-      flex: 1;
-      background: #111;
-      border: 1px solid #333;
-      padding: 8px 10px;
-      font-size: 14px;
-      border-radius: 8px;
-    }
+      button.primary:hover {
+        background: var(--accent-dark);
+      }
 
-    .handle {
-      width: 32px;
-      height: 32px;
-      background: #333;
-      border-radius: 6px;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: grab;
-      flex-shrink: 0;
-    }
+      button.danger {
+        background: var(--danger);
+      }
 
-    .download-row button {
-      width: 34px;
-      height: 34px;
-      padding: 0;
-      font-size: 18px;
-      background: var(--danger);
-      border-radius: 8px;
-    }
+      .download-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        background: var(--surface);
+        padding: 10px 12px;
+        border-radius: 10px;
+        cursor: grab;
+        user-select: none;
+        touch-action: manipulation;
+      }
 
-    .preview-area {
-      background: #000;
-      border-radius: var(--radius);
-      padding: 12px;
-      min-height: 120px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      overflow: hidden;
-    }
+      .download-row.dragging {
+        opacity: 0.6;
+        transform: scale(0.98);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
 
-    .preview-area video {
-      width: 100%;
-      max-height: 240px;
-      border-radius: 8px;
-      background: #111;
-    }
+      .download-row input {
+        flex: 1;
+        background: #111;
+        border: 1px solid #333;
+        padding: 8px 10px;
+        font-size: 14px;
+        border-radius: 8px;
+      }
 
-    .preview-download-btn {
-      background: var(--accent);
-      color: white;
-      padding: 10px;
-      border-radius: 8px;
-      font-weight: 600;
-      text-align: center;
-      cursor: pointer;
-    }
+      .handle {
+        width: 32px;
+        height: 32px;
+        background: #333;
+        border-radius: 6px;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        flex-shrink: 0;
+      }
 
-    .link-output {
-      display: flex;
-      gap: 8px;
-    }
+      .download-row button {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        font-size: 18px;
+        background: var(--danger);
+        border-radius: 8px;
+      }
 
-    .link-output textarea {
-      flex: 1;
-      font-family: monospace;
-      font-size: 14px;
-      resize: none;
-      height: 52px;
-    }
+      .preview-area {
+        background: #000;
+        border-radius: var(--radius);
+        padding: 12px;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        overflow: hidden;
+      }
 
-    .history-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+      .preview-area video {
+        width: 100%;
+        max-height: 240px;
+        border-radius: 8px;
+        background: #111;
+      }
 
-    .history-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
+      .preview-download-btn {
+        background: var(--accent);
+        color: white;
+        padding: 10px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-align: center;
+        cursor: pointer;
+      }
 
-    .history-actions button {
-      flex: 1;
-      min-width: 90px;
-      padding: 10px 0;
-      font-size: 13.5px;
-    }
+      .link-output {
+        display: flex;
+        gap: 8px;
+      }
 
-    @media (max-width: 540px) {
-      body { padding: 10px; }
-      .container { gap: 12px; }
-      .download-row { padding: 8px 10px; gap: 6px; }
-      button, input { font-size: 14px; }
-    }
-  </style>
-</head>
-<body>
+      .link-output textarea {
+        flex: 1;
+        font-family: monospace;
+        font-size: 14px;
+        resize: none;
+        height: 52px;
+      }
 
-<div class="container">
-  <h1>Admin Narapoi</h1>
+      .history-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
 
-  <input id="id"    placeholder="ID video (kosong = auto generate)" />
-  <input id="title" placeholder="Judul video" />
-  <input id="src"   placeholder="Link video (.mp4 atau m3u8)" />
+      .history-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
 
-  <h3>Tombol Download</h3>
-  <div id="downloads"></div>
+      .history-actions button {
+        flex: 1;
+        min-width: 90px;
+        padding: 10px 0;
+        font-size: 13.5px;
+      }
 
-  <button onclick="addDownload()">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z"/></svg>
-    Tambah tombol download
-  </button>
+      @media (max-width: 540px) {
+        body {
+          padding: 10px;
+        }
 
-  <button class="primary" onclick="save()">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
-    Generate & Simpan
-  </button>
+        .container {
+          gap: 12px;
+        }
 
-  <h3>Link Hasil</h3>
-  <div class="link-output">
-    <textarea id="link" readonly placeholder="Link akan muncul setelah generate"></textarea>
-    <button onclick="copyLink()">Salin</button>
-  </div>
+        .download-row {
+          padding: 8px 10px;
+          gap: 6px;
+        }
 
-  <h3>Preview</h3>
-  <div id="preview" class="preview-area">
-    <div style="color:#555; text-align:center; padding:50px 0; font-size:14px;">
-      Video + tombol download akan muncul di sini
-    </div>
-  </div>
+        button,
+        input {
+          font-size: 14px;
+        }
+      }
+    </style>
+  </head>
 
-  <h3>History Terakhir</h3>
-  <div id="history"></div>
-</div>
+  <body>
+    <div class="container">
+      <h1>Admin Narapoi</h1>
 
-<script>
-// ──────────────────────────────────────────────
-// Semua logic JS asli kamu (hanya tambah drag improvement)
-// ──────────────────────────────────────────────
+      <input id="id" placeholder="ID video (kosong = auto generate)" />
+      <input id="title" placeholder="Judul video" />
+      <input id="src" placeholder="Link video (.mp4 atau m3u8)" />
 
-const $ = id => document.getElementById(id);
-let dragged = null;
+      <h3>Tombol Download</h3>
+      <div id="downloads"></div>
 
-function addDownload(label = '', url = '') {
-  const d = document.createElement('div');
-  d.className = 'download-row';
-  d.draggable = true;
+      <button onclick="addDownload()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+        </svg>
+        Tambah tombol download
+      </button>
 
-  d.innerHTML = `
-    <div class="handle">☰</div>
-    <input placeholder="Judul tombol" value="${label}">
-    <input placeholder="Link download" value="${url}">
-    <button onclick="this.parentNode.remove()">×</button>
-  `;
+      <button class="primary" onclick="save()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+          <path
+            d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"
+          />
+        </svg>
+        Generate & Simpan
+      </button>
 
-  // Drag & drop events (bisa drag dari mana saja di row)
-  d.addEventListener('dragstart', () => {
-    dragged = d;
-    d.classList.add('dragging');
-  });
-
-  d.addEventListener('dragend', () => {
-    d.classList.remove('dragging');
-    dragged = null;
-  });
-
-  d.addEventListener('dragover', e => {
-    e.preventDefault();
-    const after = getDragAfterElement($('downloads'), e.clientY);
-    if (!after) $('downloads').appendChild(dragged);
-    else $('downloads').insertBefore(dragged, after);
-  });
-
-  // Touch support (mobile drag & drop)
-  let touchStartY = 0;
-  d.addEventListener('touchstart', e => {
-    dragged = d;
-    d.classList.add('dragging');
-    touchStartY = e.touches[0].clientY;
-  }, { passive: true });
-
-  d.addEventListener('touchmove', e => {
-    if (!dragged) return;
-    e.preventDefault();
-    const touchY = e.touches[0].clientY;
-    const after = getDragAfterElement($('downloads'), touchY);
-    if (!after) $('downloads').appendChild(dragged);
-    else $('downloads').insertBefore(dragged, after);
-  }, { passive: false });
-
-  d.addEventListener('touchend', () => {
-    d.classList.remove('dragging');
-    dragged = null;
-  });
-
-  $('downloads').appendChild(d);
-}
-
-function getDragAfterElement(container, y) {
-  const draggableElements = [...container.querySelectorAll('.download-row:not(.dragging)')];
-  return draggableElements.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height / 2;
-    if (offset < 0 && offset > closest.offset) {
-      return { offset: offset, element: child };
-    }
-    return closest;
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
-
-// Optional: menu up/down via handle (kalau mau pakai prompt)
-function moveDownload(el) {
-  const row = el.parentNode;
-  const container = $('downloads');
-  const index = [...container.children].indexOf(row);
-  const move = prompt("Ketik 'up' atau 'down'", "");
-  if (move === 'up' && index > 0) {
-    container.insertBefore(row, container.children[index - 1]);
-  }
-  if (move === 'down' && index < container.children.length - 1) {
-    container.insertBefore(row, container.children[index + 1].nextSibling);
-  }
-}
-
-// Tambah satu baris kosong saat load
-addDownload();
-
-// ──────────────────────────────────────────────
-// Sisanya sama persis seperti kode asli kamu
-// ──────────────────────────────────────────────
-
-function save() {
-  let id = $('id').value.trim();
-  const title = $('title').value.trim();
-  const src = $('src').value.trim();
-  if (!title || !src) return alert('Lengkapi judul dan link video');
-  if (!id) id = 'vid_' + Date.now().toString(36);
-
-  const downloads = [];
-  document.querySelectorAll('.download-row').forEach(r => {
-    const labelInput = r.children[1];
-    const urlInput = r.children[2];
-    if (urlInput.value.trim()) {
-      downloads.push({
-        label: labelInput.value.trim() || 'Download',
-        url: urlInput.value.trim()
-      });
-    }
-  });
-  if (!downloads.length) downloads.push({ label: 'Download', url: src });
-
-  const data = { [id]: { title, src, downloads } };
-
-  fetch('/videos', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  })
-  .then(() => {
-    $('link').value = location.origin + '/?v=' + id;
-    renderPreview(data[id]);
-    saveHistory(data, id);
-    alert('Berhasil disimpan!');
-  })
-  .catch(err => alert('Gagal menyimpan: ' + err.message));
-}
-
-function renderPreview(v) {
-  $('preview').innerHTML = '';
-  const video = document.createElement('video');
-  video.src = v.src;
-  video.controls = true;
-  video.autoplay = false;
-  $('preview').appendChild(video);
-
-  v.downloads.forEach(d => {
-    const btn = document.createElement('button');
-    btn.className = 'preview-download-btn';
-    btn.textContent = d.label;
-    btn.onclick = () => window.open(d.url, '_blank');
-    $('preview').appendChild(btn);
-  });
-}
-
-function copyLink() {
-  const link = $('link');
-  link.select();
-  navigator.clipboard.writeText(link.value);
-  alert('Link disalin!');
-}
-
-function saveHistory(data, id) {
-  let h = JSON.parse(localStorage.getItem('history') || '[]');
-  h.unshift(data);
-  localStorage.setItem('history', JSON.stringify(h.slice(0, 10)));
-  renderHistory();
-}
-
-function renderHistory() {
-  const h = JSON.parse(localStorage.getItem('history') || '[]');
-  $('history').innerHTML = '';
-  h.forEach((o, i) => {
-    const key = Object.keys(o)[0];
-    const val = o[key];
-    const card = document.createElement('div');
-    card.className = 'history-card';
-    card.innerHTML = `
-      <strong>${key}</strong> — ${val.title}
-      <div class="history-actions">
-        <button onclick="previewHistory(${i})">Preview</button>
-        <button onclick="editHistory(${i})">Edit</button>
-        <button class="danger" onclick="delHistory(${i})">Hapus</button>
+      <h3>Link Hasil</h3>
+      <div class="link-output">
+        <textarea id="link" readonly placeholder="Link akan muncul setelah generate"></textarea>
+        <button onclick="copyLink()">Salin</button>
       </div>
-    `;
-    $('history').appendChild(card);
-  });
-}
 
-function previewHistory(i) {
-  const h = JSON.parse(localStorage.getItem('history') || '[]');
-  const key = Object.keys(h[i])[0];
-  const v = h[i][key];
-  $('id').value = key;
-  $('title').value = v.title;
-  $('src').value = v.src;
-  $('downloads').innerHTML = '';
-  v.downloads.forEach(d => addDownload(d.label, d.url));
-  $('link').value = location.origin + '/?v=' + key;
-  renderPreview(v);
-}
+      <h3>Preview</h3>
+      <div id="preview" class="preview-area">
+        <div style="color: #555; text-align: center; padding: 50px 0; font-size: 14px">
+          Video + tombol download akan muncul di sini
+        </div>
+      </div>
 
-function editHistory(i) { previewHistory(i); }
+      <h3>History Terakhir</h3>
+      <div id="history"></div>
+    </div>
 
-function delHistory(i) {
-  let h = JSON.parse(localStorage.getItem('history') || '[]');
-  h.splice(i, 1);
-  localStorage.setItem('history', JSON.stringify(h));
-  renderHistory();
-}
+    <script>
+      // ──────────────────────────────────────────────
+      // Semua logic JS asli kamu (hanya tambah drag improvement)
+      // ──────────────────────────────────────────────
 
-renderHistory();
-</script>
-</body>
+      const $ = (id) => document.getElementById(id);
+      let dragged = null;
+
+      function addDownload(label = "", url = "") {
+        const d = document.createElement("div");
+        d.className = "download-row";
+        d.draggable = true;
+
+        d.innerHTML = `
+          <div class="handle">☰</div>
+          <input placeholder="Judul tombol" value="${label}">
+          <input placeholder="Link download" value="${url}">
+          <button onclick="this.parentNode.remove()">×</button>
+        `;
+
+        // Drag & drop events (bisa drag dari mana saja di row)
+        d.addEventListener("dragstart", () => {
+          dragged = d;
+          d.classList.add("dragging");
+        });
+
+        d.addEventListener("dragend", () => {
+          d.classList.remove("dragging");
+          dragged = null;
+        });
+
+        d.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          const after = getDragAfterElement($("downloads"), e.clientY);
+          if (!after) $("downloads").appendChild(dragged);
+          else $("downloads").insertBefore(dragged, after);
+        });
+
+        // Touch support (mobile drag & drop)
+        let touchStartY = 0;
+        d.addEventListener(
+          "touchstart",
+          (e) => {
+            dragged = d;
+            d.classList.add("dragging");
+            touchStartY = e.touches[0].clientY;
+          },
+          { passive: true }
+        );
+
+        d.addEventListener(
+          "touchmove",
+          (e) => {
+            if (!dragged) return;
+            e.preventDefault();
+            const touchY = e.touches[0].clientY;
+            const after = getDragAfterElement($("downloads"), touchY);
+            if (!after) $("downloads").appendChild(dragged);
+            else $("downloads").insertBefore(dragged, after);
+          },
+          { passive: false }
+        );
+
+        d.addEventListener("touchend", () => {
+          d.classList.remove("dragging");
+          dragged = null;
+        });
+
+        $("downloads").appendChild(d);
+      }
+
+      function getDragAfterElement(container, y) {
+        const draggableElements = [
+          ...container.querySelectorAll(".download-row:not(.dragging)"),
+        ];
+        return draggableElements.reduce(
+          (closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+              return { offset: offset, element: child };
+            }
+            return closest;
+          },
+          { offset: Number.NEGATIVE_INFINITY }
+        ).element;
+      }
+
+      // Optional: menu up/down via handle (kalau mau pakai prompt)
+      function moveDownload(el) {
+        const row = el.parentNode;
+        const container = $("downloads");
+        const index = [...container.children].indexOf(row);
+        const move = prompt("Ketik 'up' atau 'down'", "");
+        if (move === "up" && index > 0) {
+          container.insertBefore(row, container.children[index - 1]);
+        }
+        if (move === "down" && index < container.children.length - 1) {
+          container.insertBefore(row, container.children[index + 1].nextSibling);
+        }
+      }
+
+      // Tambah satu baris kosong saat load
+      addDownload();
+
+      // ──────────────────────────────────────────────
+      // Sisanya sama persis seperti kode asli kamu
+      // ──────────────────────────────────────────────
+
+      function save() {
+        let id = $("id").value.trim();
+        const title = $("title").value.trim();
+        const src = $("src").value.trim();
+        if (!title || !src) return alert("Lengkapi judul dan link video");
+        if (!id) id = "vid_" + Date.now().toString(36);
+
+        const downloads = [];
+        document.querySelectorAll(".download-row").forEach((r) => {
+          const labelInput = r.children[1];
+          const urlInput = r.children[2];
+          if (urlInput.value.trim()) {
+            downloads.push({
+              label: labelInput.value.trim() || "Download",
+              url: urlInput.value.trim(),
+            });
+          }
+        });
+        if (!downloads.length) downloads.push({ label: "Download", url: src });
+
+        const data = { [id]: { title, src, downloads } };
+
+        fetch("/videos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        })
+          .then(() => {
+            $("link").value = location.origin + "/?v=" + id;
+            renderPreview(data[id]);
+            saveHistory(data, id);
+            alert("Berhasil disimpan!");
+          })
+          .catch((err) => alert("Gagal menyimpan: " + err.message));
+      }
+
+      function renderPreview(v) {
+        $("preview").innerHTML = "";
+        const video = document.createElement("video");
+        video.src = v.src;
+        video.controls = true;
+        video.autoplay = false;
+        $("preview").appendChild(video);
+
+        v.downloads.forEach((d) => {
+          const btn = document.createElement("button");
+          btn.className = "preview-download-btn";
+          btn.textContent = d.label;
+          btn.onclick = () => window.open(d.url, "_blank");
+          $("preview").appendChild(btn);
+        });
+      }
+
+      function copyLink() {
+        const link = $("link");
+        link.select();
+        navigator.clipboard.writeText(link.value);
+        alert("Link disalin!");
+      }
+
+      function saveHistory(data, id) {
+        let h = JSON.parse(localStorage.getItem("history") || "[]");
+        h.unshift(data);
+        localStorage.setItem("history", JSON.stringify(h.slice(0, 10)));
+        renderHistory();
+      }
+
+      function renderHistory() {
+        const h = JSON.parse(localStorage.getItem("history") || "[]");
+        $("history").innerHTML = "";
+        h.forEach((o, i) => {
+          const key = Object.keys(o)[0];
+          const val = o[key];
+          const card = document.createElement("div");
+          card.className = "history-card";
+          card.innerHTML = `
+            <strong>${key}</strong> — ${val.title}
+            <div class="history-actions">
+              <button onclick="previewHistory(${i})">Preview</button>
+              <button onclick="editHistory(${i})">Edit</button>
+              <button class="danger" onclick="delHistory(${i})">Hapus</button>
+            </div>
+          `;
+          $("history").appendChild(card);
+        });
+      }
+
+      function previewHistory(i) {
+        const h = JSON.parse(localStorage.getItem("history") || "[]");
+        const key = Object.keys(h[i])[0];
+        const v = h[i][key];
+        $("id").value = key;
+        $("title").value = v.title;
+        $("src").value = v.src;
+        $("downloads").innerHTML = "";
+        v.downloads.forEach((d) => addDownload(d.label, d.url));
+        $("link").value = location.origin + "/?v=" + key;
+        renderPreview(v);
+      }
+
+      function editHistory(i) {
+        previewHistory(i);
+      }
+
+      function delHistory(i) {
+        let h = JSON.parse(localStorage.getItem("history") || "[]");
+        h.splice(i, 1);
+        localStorage.setItem("history", JSON.stringify(h));
+        renderHistory();
+      }
+
+      renderHistory();
+    </script>
+  </body>
 </html>
